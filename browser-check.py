@@ -1,4 +1,4 @@
-"""本地 Chromium/WebKit（若已安装）端到端检查；需先在 8080 端口启动静态服务器。"""
+"""本地 Chromium/WebKit（若已安装）端到端检查；需先在 8081 端口启动静态服务器。"""
 from pathlib import Path
 import json
 from playwright.sync_api import sync_playwright
@@ -7,7 +7,7 @@ with sync_playwright() as p:
  browser=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
  context=browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True,device_scale_factor=2,accept_downloads=True)
  page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
- page.goto('http://127.0.0.1:8080');page.wait_for_selector('#start')
+ page.goto('http://127.0.0.1:8081');page.wait_for_selector('#start')
  assert page.locator('#time').inner_text()=='25:00'
  # 旧数据迁移不丢失
  page.evaluate("""() => {localStorage.clear();localStorage.setItem('yike-pomodoro-v1',JSON.stringify({tasks:[{id:'old',text:'阅读科研论文',done:false}],counts:{'2026-10-18':2},timer:{mode:'focus',remaining:1500,endAt:null}}));} """)
@@ -27,6 +27,7 @@ with sync_playwright() as p:
  data=page.evaluate("JSON.parse(localStorage.getItem('yike-study-v2'))");assert data['pet']['xp']==25;assert data['pet']['coins']==10
  page.reload();page.wait_for_timeout(100);assert page.evaluate("JSON.parse(localStorage.getItem('yike-study-v2')).pet.xp")==25
  page.locator('.bottom-nav [data-go="words"]').click();assert page.locator('#page-words').is_visible()
+ page.locator('#word-order').select_option('sequence');page.wait_for_timeout(100)
  assert page.locator('[data-grade="known"]').is_disabled()
  page.locator('#flashcard').click();page.locator('[data-grade="unknown"]').click();page.wait_for_timeout(100)
  data=page.evaluate("JSON.parse(localStorage.getItem('yike-study-v2'))");assert data['progress']['abandon']['wrong']
@@ -67,7 +68,7 @@ with sync_playwright() as p:
  # 每个页面和多种屏幕宽度，无横向溢出
  for width,height in [(320,740),(390,844),(768,1024),(1024,768),(1440,900)]:
   page.set_viewport_size({'width':width,'height':height})
-  for route in ['focus','words','pet','stats']:
+  for route in ['focus','words','reading','pet','stats']:
    page.locator(f'.bottom-nav [data-go="{route}"]').click();page.wait_for_timeout(50)
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),(width,route)
  page.set_viewport_size({'width':390,'height':844});page.locator('.bottom-nav [data-go="pet"]').click();page.screenshot(path='/workspace/chinese-pomodoro-pet-mobile.png',full_page=True)
@@ -75,7 +76,7 @@ with sync_playwright() as p:
  # 两标签同一到期 session 只发一次奖励
  page.evaluate("""() => {let s=JSON.parse(localStorage.getItem('yike-study-v2'));s.timer={mode:'focus',id:'two-tabs',endAt:Date.now()+300,total:1200,remaining:1200};localStorage.setItem('yike-study-v2',JSON.stringify(s));} """)
  before=page.evaluate("JSON.parse(localStorage.getItem('yike-study-v2')).pet.xp")
- tab=context.new_page();tab.goto('http://127.0.0.1:8080');page.reload();page.wait_for_timeout(1800)
+ tab=context.new_page();tab.goto('http://127.0.0.1:8081');page.reload();page.wait_for_timeout(1800)
  assert page.evaluate("JSON.parse(localStorage.getItem('yike-study-v2')).pet.xp")==before+25
  # 泰迪外观、点击摸头、升级动画与减少动态效果
  page.evaluate("""() => {let s=JSON.parse(localStorage.getItem('yike-study-v2'));s.pet.xp=99;s.pet.sleeping=false;s.pet.cooldowns={};s.settings.reduced=false;s.timer={mode:'focus',id:'level-up-test',endAt:Date.now()-1,total:1200,remaining:1200};localStorage.setItem('yike-study-v2',JSON.stringify(s));} """)
@@ -102,5 +103,5 @@ with sync_playwright() as p:
  assert page.locator('.pet-eyes').first.evaluate("el=>getComputedStyle(el).animationName")=='none'
  page.screenshot(path='/workspace/chinese-pomodoro-teddy-mobile.png',full_page=True)
  assert not errors,errors
- print('浏览器检查通过：旧数据迁移、任务、时间设置/暂停/刷新、结算去重、30词奖励、到期复习、小测、宠物、购物、主题、JSON备份、五种宽度四页布局、双标签奖励。页面脚本错误：0。')
+ print('浏览器检查通过：旧数据迁移、任务、时间设置/暂停/刷新、结算去重、30词奖励、到期复习、小测、宠物、购物、主题、JSON备份、五种宽度五页布局、双标签奖励。页面脚本错误：0。')
  browser.close()

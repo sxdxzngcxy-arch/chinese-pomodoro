@@ -1,11 +1,12 @@
 /* 数据和规则层；不依赖 DOM，供浏览器和 Node 检查共同使用。 */
 (function(root){
 'use strict';
+const L=typeof module!=='undefined'&&module.exports?require('./learning-core.js'):root.LearningCore;
 const DAY=86400000, KEY='yike-study-v2', LEGACY='yike-pomodoro-v1';
 const day=(ms=Date.now())=>{const d=new Date(ms);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
 const addDay=(ms,n)=>{const d=new Date(ms);d.setDate(d.getDate()+n);return d.getTime();};
 const uid=()=>globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;
-const fresh=()=>({version:2,settings:{goal:30,focus:25,break:5,theme:'system',reduced:false},tasks:[],counts:{},focusMinutes:{},days:{},progress:{},pet:{species:'teddy',xp:0,coins:0,food:3,mood:80,hunger:80,bond:0,sleeping:false,owned:[],cooldowns:{}},ledger:{},timer:{mode:'focus',remaining:1500,endAt:null,id:null,total:1500},revision:0});
+const fresh=()=>({version:2,study:L.fresh(),settings:{goal:30,focus:25,break:5,theme:'system',reduced:false},tasks:[],counts:{},focusMinutes:{},days:{},progress:{},pet:{species:'teddy',xp:0,coins:0,food:3,mood:80,hunger:80,bond:0,sleeping:false,owned:[],cooldowns:{}},ledger:{},timer:{mode:'focus',remaining:1500,endAt:null,id:null,total:1500},revision:0});
 const obj=x=>x!==null && typeof x==='object' && !Array.isArray(x);
 const safeKey=k=> !['__proto__','constructor','prototype'].includes(k);
 const numeric=(v,min=0,max=1e15)=>Number.isFinite(v)&&v>=min&&v<=max;
@@ -21,8 +22,8 @@ function normalize(raw, wordIds){
  for(const key of ['counts','focusMinutes']){if(!obj(raw[key]))throw Error('专注记录无效。');for(const [k,v] of Object.entries(raw[key])){if(!dateKey(k)||!numeric(v))throw Error('专注记录无效。');s[key][k]=v;}}
  if(!obj(raw.progress))throw Error('单词进度无效。');
  for(const [k,p] of Object.entries(raw.progress)){
-  if(!safeKey(k)||!obj(p)||!integer(p.stage,0,6)||!numeric(p.due)||!dateKey(p.firstDay)||!integer(p.attempts,1)||!integer(p.correct,0,p.attempts)||typeof p.wrong!=='boolean')throw Error('单词进度内容无效。');
-  if(!wordIds||wordIds.has(k))s.progress[k]={stage:p.stage,due:p.due,firstDay:p.firstDay,attempts:p.attempts,correct:p.correct,wrong:p.wrong};
+  if(!safeKey(k)||!obj(p)||!integer(p.stage,0,6)||!numeric(p.due)||!dateKey(p.firstDay)||!integer(p.attempts,1)||!integer(p.correct,0,p.attempts)||typeof p.wrong!=='boolean'||p.lastGrade!==undefined&&!['known','vague','unknown'].includes(p.lastGrade))throw Error('单词进度内容无效。');
+  s.progress[k]={stage:p.stage,due:p.due,firstDay:p.firstDay,attempts:p.attempts,correct:p.correct,wrong:p.wrong,lastGrade:p.lastGrade|| (p.wrong?(p.stage===0?'unknown':'vague'):'known')};
  }
  if(!obj(raw.days))throw Error('学习记录无效。');
  for(const [k,v] of Object.entries(raw.days)){if(!dateKey(k)||!obj(v)||!integer(v.newWords)||!integer(v.reviews)||!integer(v.attempts)||!integer(v.correct,0,v.attempts))throw Error('每日学习记录无效。');s.days[k]={newWords:v.newWords,reviews:v.reviews,attempts:v.attempts,correct:v.correct};}
@@ -33,7 +34,7 @@ function normalize(raw, wordIds){
  if(!obj(raw.ledger)||Object.keys(raw.ledger).length>200000)throw Error('结算记录无效。');
  for(const [k,v]of Object.entries(raw.ledger)){if(!safeKey(k)||k.length>240||!numeric(v))throw Error('结算记录无效。');s.ledger[k]=v;}
  const t=raw.timer;if(!obj(t)||!['focus','break'].includes(t.mode)||!numeric(t.total,60,10800)||!numeric(t.remaining,0,t.total)||(t.endAt!==null&&!numeric(t.endAt,1,1e15))||(t.id!==null&&(typeof t.id!=='string'||!safeKey(t.id)||t.id.length>100))||(t.endAt!==null&&!t.id))throw Error('计时状态无效。');
- s.timer={mode:t.mode,total:t.total,remaining:t.remaining,endAt:t.endAt,id:t.id};s.revision=integer(raw.revision)?raw.revision:0;
+ s.timer={mode:t.mode,total:t.total,remaining:t.remaining,endAt:t.endAt,id:t.id};s.revision=integer(raw.revision)?raw.revision:0;s.study=L.normalize(raw.study);
  return s;
 }
 function migrate(old){
@@ -73,7 +74,7 @@ function grade(s,id,grade,now){
  const d=daily(s,now), known=grade==='known';
  const p=prev||{stage:0,due:0,firstDay:day(now),attempts:0,correct:0,wrong:false};
  if(!prev)d.newWords++;else d.reviews++;
- p.attempts++;d.attempts++;
+ p.lastGrade=grade;p.attempts++;d.attempts++;
  if(known){p.correct++;d.correct++;p.stage=Math.min(6,p.stage+1);p.due=addDay(now,[0,1,3,7,14,30,60][p.stage]);p.wrong=false;
   if(prev)reward(s,`review:${day(now)}:${id}`,now,{xp:2});
  }else{p.stage=grade==='unknown'?0:Math.max(0,p.stage-1);p.due=now+(grade==='unknown'?10:30)*60000;p.wrong=true;}

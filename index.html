@@ -10,9 +10,13 @@
   <title>一刻专注 · 学习与陪伴</title>
   <link rel="stylesheet" href="styles.css">
   <script src="words.js" defer></script>
+  <script src="learning-core.js" defer></script>
   <script src="core.js" defer></script>
+  <script src="memory-data.js" defer></script>
+  <script src="reading-data.js" defer></script>
   <script src="pets.js" defer></script>
   <script src="app.js" defer></script>
+  <script src="learning.js" defer></script>
 </head>
 <body>
   <div class="page">
@@ -39,22 +43,31 @@
         <div class="word-layout">
           <div class="card word-main">
             <div class="section-heading"><h2>今日词卡</h2><span id="word-position" class="pill"></span></div>
-            <div class="segmented" role="group" aria-label="学习范围"><button data-filter="learn" aria-pressed="true">今日学习</button><button data-filter="review" aria-pressed="false">到期复习 <span id="due-count"></span></button><button data-filter="wrong" aria-pressed="false">错词本 <span id="wrong-count"></span></button></div>
+            <label class="select-label">学习顺序<select id="word-order"><option value="random">完全随机</option><option value="sequence">顺序学习</option><option value="weak">薄弱词优先</option></select></label><p class="helper">单次队列不重复，刷新保留顺序。随机模式混排到期词与新词；薄弱词优先先复习错词。</p><div class="segmented" role="group" aria-label="学习范围"><button data-filter="learn" aria-pressed="true">今日学习</button><button data-filter="review" aria-pressed="false">到期复习 <span id="due-count"></span></button><button data-filter="wrong" aria-pressed="false">错词本 <span id="wrong-count"></span></button></div>
             <div id="flash-area">
               <button id="flashcard" class="flashcard" aria-expanded="false" aria-label="翻转单词卡，查看释义">
                 <span class="card-inner"><span class="card-face card-front"><span class="word-tag" id="word-tag">新词</span><strong id="word-en"></strong><span class="ipa" id="word-ipa"></span><span class="flip-hint">轻点卡片，查看释义 ↻</span></span><span class="card-face card-back"><span id="word-pos" class="word-tag"></span><strong id="word-meaning"></strong><span id="word-example"></span><span id="word-translation"></span><span class="flip-hint">轻点返回英文 ↻</span></span></span>
               </button>
-              <button id="speak" class="speak">◖ 点击发音</button>
+              <div class="word-tools"><button id="speak" class="speak">◖ 点击发音</button><label class="sr-only" for="word-accent">发音口音</label><select id="word-accent"><option value="en-GB">英式</option><option value="en-US">美式</option></select><button id="favorite-word" class="soft">☆ 收藏</button></div>
               <div class="grades" role="group" aria-label="评价掌握程度"><button data-grade="unknown">不认识<span>10 分钟后</span></button><button data-grade="vague">模糊<span>30 分钟后</span></button><button data-grade="known">认识<span>延长复习间隔</span></button></div>
-              <small class="helper" id="grade-hint">先翻开卡片，再诚实评价自己，不必急着记住。</small>
+              <small class="helper" id="grade-hint">先翻开卡片，再诚实评价自己，不必急着记住。</small><details id="memory-panel" class="memory-panel"><summary>联想记忆与主动回忆</summary><div id="memory-content"></div></details>
             </div>
             <div id="word-empty" class="empty" hidden><span>✿</span><p id="word-empty-text"></p><small id="next-review"></small><button id="more-study" class="soft" data-go="pet">去小屋休息一下 →</button></div>
           </div>
           <div class="word-side">
-            <section class="card"><div class="section-heading"><h2>今天的小目标</h2><span id="new-progress" class="pill"></span></div><progress id="goal-progress" max="30" value="0"></progress><form id="goal-form" class="goal-form"><label for="daily-goal">每日新词</label><input id="daily-goal" type="number" min="1" max="200" required><button type="submit">保存</button></form><p class="helper">默认 30 新词；到期词优先。每完成 30 个新词，当天可领一次 20 金币 + 2 份食物。目标可按自己的节奏调整。</p></section>
+            <section class="card library-card"><div class="section-heading"><h2>我的词库</h2><span id="library-count" class="pill"></span></div><p class="helper">个人词、阅读生词和收藏集中管理。已学词保持稳定 id，编辑释义不重置进度。</p><div class="inline-actions"><button id="add-custom-word" class="soft">＋ 添加单词</button><button id="show-library" class="soft">管理 / 收藏</button></div><label class="import-label">导入 JSON / CSV 词库<input id="word-file" type="file" accept=".json,.csv,application/json,text/csv"></label><a class="template-link" href="word-template.csv" download>下载 CSV 模板</a><div id="word-import-preview" hidden><p id="word-import-summary"></p><div id="word-import-errors" class="helper"></div><button id="confirm-word-import" class="soft">导入有效且不重复的词</button><button id="cancel-word-import" class="soft">取消</button></div><div id="library-panel" hidden><label class="sr-only" for="library-search">搜索个人词和收藏</label><input id="library-search" placeholder="搜索个人词和收藏" type="search"><div id="library-list"></div></div></section>
+            <section class="card"><div class="section-heading"><h2>今天的小目标</h2><span id="new-progress" class="pill"></span></div><progress id="goal-progress" max="30" value="0"></progress><form id="goal-form" class="goal-form"><label for="daily-goal">每日新词</label><input id="daily-goal" type="number" min="1" max="200" required><button type="submit">保存</button></form><p class="helper">默认 30 新词，目标只限制新词；按所选顺序学习。每完成 30 个新词，当天可领一次 20 金币 + 2 份食物。目标可按自己的节奏调整。</p></section>
             <section class="card"><div class="section-heading"><h2>双向小测</h2><span id="quiz-count" class="pill"></span></div><p class="helper">仅测已学词；每词每方向每天计分一次，不发经验。</p><label class="select-label" for="quiz-direction">题型 <select id="quiz-direction"><option value="en-zh">英译中</option><option value="zh-en">中译英</option></select></label><p id="quiz-prompt" class="quiz-prompt"></p><div id="quiz-options" class="quiz-options"></div><p id="quiz-feedback" role="status"></p><button id="quiz-next" class="soft">下一题 →</button></section>
             <details class="card"><summary>错词与复习计划</summary><p class="helper">认识后按 1、3、7、14、30、60 天复习；模糊 30 分钟、不认识 10 分钟后再见。错词答对到期词卡后移出错词本。小测答错也会收进错词本。</p><div id="wrong-list" class="wrong-list"></div></details>
           </div>
+        </div>
+      </section>
+      <section id="page-reading" class="view reading-view" hidden aria-label="阅读训练">
+        <div class="intro"><span class="eyebrow">EVIDENCE BEFORE ANSWERS · V1.1</span><h1>读懂，也选对。</h1><p>先定位依据，再辨别范围、推断与同义替换。</p></div>
+        <div class="reading-layout"><aside class="reading-sidebar"><section class="card"><h2>仔细阅读训练</h2><p class="helper">内置 1 篇原创模拟题，5 道单选题。所有结果只显示练习正确率，不换算官方六级分数。</p><label class="select-label" for="reading-select">选择材料</label><select id="reading-select"></select><p id="reading-source" class="helper"></p><div class="inline-actions"><button id="start-reading" class="soft">开始 / 继续</button><button id="retry-reading" class="soft">重练错题</button></div><p id="reading-timer" class="reading-timer" role="timer">00:00</p><button id="pause-reading" class="soft" hidden>暂停阅读计时</button><p id="reading-summary" class="helper"></p></section>
+          <section class="card"><h2>导入自己的文章和题目</h2><p class="helper">使用你提供或获准使用的材料。本版支持仔细阅读单选题，逐题校验答案、依据句和干扰项解释。音频地址仅预留保存。</p><label class="import-label">选择题库 JSON<input id="reading-file" type="file" accept=".json,application/json"></label><a class="template-link" href="reading-template.json" download>下载题库 JSON 示例</a><div id="reading-import-preview" hidden><p id="reading-import-summary"></p><button id="confirm-reading-import" class="soft">确认添加题库</button><button id="cancel-reading-import" class="soft">取消</button></div></section>
+          <section class="card"><h2>我的错因分布</h2><div id="reading-reasons"></div><p class="helper">统计最近一次仍答错的题；在解析下标记原因。重新答对后移出错题集合。</p></section></aside>
+          <div class="reading-main"><section id="reading-empty" class="card empty"><span>▤</span><p>准备好后，开始一篇阅读。</p><small>作答自动保存，交卷后再显示答案与解析。</small></section><div id="reading-work" hidden><section class="card article-card"><div class="section-heading"><h2 id="reading-title"></h2><span id="reading-kind" class="pill"></span></div><p class="helper">轻点英文词可查看或加入个人词库。暂缺释义的生词会标记“待完善”，不会混入背词队列。</p><div id="reading-passage" class="reading-passage"></div><div id="reading-word-tool" class="reading-word-tool" hidden><strong id="reading-word-label"></strong><span id="reading-word-definition"></span><button id="add-reading-word" class="soft">加入生词本</button><button id="edit-reading-word" class="soft" hidden>补充 / 编辑释义</button></div></section><section class="card reading-questions"><div class="section-heading"><h2>选择与证据</h2><span id="reading-result" class="pill"></span></div><div id="reading-question-list"></div><button id="submit-reading" class="primary">交卷并查看解析</button><div id="reading-restart" hidden><button id="new-reading-attempt" class="soft">重新练习全文</button></div></section></div></div>
         </div>
       </section>
       <section id="page-pet" class="view" hidden aria-label="宠物">
@@ -81,7 +94,8 @@
     </main>
     <footer><span class="leaf" aria-hidden="true">❧</span> 不必急着抵达，专注每一个当下。<span class="local-note">任务与记录仅保存在此浏览器</span></footer>
   </div>
-  <nav class="bottom-nav" aria-label="主导航"><button data-go="focus" aria-current="page"><span aria-hidden="true">◷</span>专注</button><button data-go="words"><span aria-hidden="true">▤</span>背单词</button><button data-go="pet"><span aria-hidden="true">♧</span>宠物</button><button data-go="stats"><span aria-hidden="true">▥</span>统计</button></nav>
+  <nav class="bottom-nav" aria-label="主导航"><button data-go="focus" aria-current="page"><span aria-hidden="true">◷</span>专注</button><button data-go="words"><span aria-hidden="true">▤</span>背单词</button><button data-go="reading"><span aria-hidden="true">▧</span>阅读</button><button data-go="pet"><span aria-hidden="true">♧</span>宠物</button><button data-go="stats"><span aria-hidden="true">▥</span>统计</button></nav>
+  <div id="word-editor" class="editor-overlay" role="dialog" aria-modal="true" aria-labelledby="word-editor-title" hidden><section class="card editor-card"><div class="section-heading"><h2 id="word-editor-title">添加个人单词</h2><button id="close-word-editor" class="soft" aria-label="关闭单词编辑">×</button></div><p class="helper">英文与中文释义必填；不确定的音标和词源请留空，不会自动编造。</p><form id="custom-word-form"><label>英文<input id="custom-word" name="word" maxlength="80" required autocomplete="off" autocapitalize="none" spellcheck="false"></label><label>中文释义<input id="custom-meaning" name="meaning" maxlength="500" required></label><div class="form-pair"><label>音标<input id="custom-ipa" name="ipa" maxlength="100"></label><label>词性<input id="custom-pos" name="pos" maxlength="100" placeholder="如 adj."></label></div><label>英文例句<textarea id="custom-example" name="example" maxlength="2000" rows="2"></textarea></label><label>例句翻译<textarea id="custom-translation" name="translation" maxlength="2000" rows="2"></textarea></label><label>常见搭配<input id="custom-collocations" name="collocations" maxlength="2000"></label><label>辅助记忆联想（不是词源）<textarea id="custom-association" name="association" maxlength="2000" rows="2"></textarea></label><button type="submit" class="primary">保存单词</button></form></section></div>
   <div id="celebration" class="celebration" role="status" hidden><div id="celebration-art" class="celebration-art" aria-hidden="true"></div><strong id="celebration-title">小满为你庆祝！</strong><span id="celebration-detail">完成专注 · +25 经验 · +10 金币</span><button data-go="pet">休息一下，去小屋 →</button><button id="dismiss-celebration" aria-label="关闭庆祝">×</button></div>
 </body>
 </html>
