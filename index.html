@@ -6,31 +6,82 @@
   <meta name="theme-color" content="#f5f4ee">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="description" content="一枚安静的学习番茄钟。专注25分钟，休息5分钟，把今天的学习一点点完成。">
-  <title>一刻专注 · 学习番茄钟</title>
+  <meta name="description" content="番茄钟、六级词汇和Q版泰迪小狗，陪你一点点完成备考与科研。">
+  <title>一刻专注 · 学习与陪伴</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="words.js" defer></script>
+  <script src="core.js" defer></script>
+  <script src="pets.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
   <div class="page">
     <header><a class="brand" href="./"><span class="brand-icon" aria-hidden="true">◷</span> 一刻专注</a><span class="header-note">留一点时间，给更好的自己</span><span class="date" id="date"></span></header>
     <main>
-      <div class="intro"><span class="eyebrow">YOUR QUIET STUDY SPACE</span><h1>专注当下，慢慢进步。</h1><p>一次只做一件事，让每一份努力都有回响。</p></div>
+      <section id="page-focus" class="view" aria-label="专注"><div class="intro"><span class="eyebrow">YOUR QUIET STUDY SPACE</span><h1>专注当下，慢慢进步。</h1><p>一次只做一件事，让每一份努力都有回响。</p></div>
       <div class="workspace">
         <section class="timer-card" aria-label="学习计时器">
           <div class="mode-tabs" role="group" aria-label="选择计时模式"><button id="focus-mode" class="selected" aria-pressed="true">专注时间</button><button id="break-mode" aria-pressed="false">短暂休息</button></div>
           <div class="clock"><svg viewBox="0 0 300 300" aria-hidden="true"><circle class="track" cx="150" cy="150" r="136"/><circle id="progress" cx="150" cy="150" r="136"/></svg><div class="clock-content"><span class="clock-label" id="clock-label">保持专注</span><div id="time" role="timer" aria-label="剩余25分钟">25:00</div><span class="clock-caption" id="clock-caption">给自己一段不被打扰的时间</span></div></div>
           <div class="timer-actions"><button id="start" class="primary">开始专注 <span aria-hidden="true">▶</span></button><button id="reset" class="reset" aria-label="重置计时器" title="重置计时器">↻</button></div>
+          <details class="timer-settings"><summary>调整时间</summary><form id="time-form"><label>专注（分钟）<input id="focus-length" type="number" min="1" max="180" required></label><label>休息（分钟）<input id="break-length" type="number" min="1" max="60" required></label><button type="submit">保存</button></form><small>保存后重置当前计时；已完成记录不受影响。</small></details>
           <p class="timer-tip"><span aria-hidden="true">✧</span> 小小的专注，也会积攒成大大的进步</p>
         </section>
         <aside>
+          <div class="companion-strip"><span aria-hidden="true">✦</span><div><strong>小满，陪你慢慢来</strong><small id="companion-text">完成专注，为小狗积攒成长能量。</small></div><button data-go="pet">看看小狗 →</button></div>
           <section class="stats-card"><div class="section-heading"><h2>今日积累</h2><span class="pill">每一步都算数</span></div><div class="stats"><div><strong id="count">0</strong><span>完成专注 / 次</span></div><div><strong id="minutes">0</strong><span>专注时长 / 分钟</span></div></div><div class="stats-footer"><span class="status-dot"></span><span id="encouragement">今天的第一份专注，从现在开始</span></div></section>
           <section class="tasks-card"><div class="section-heading"><h2>学习清单</h2><span id="task-count" class="task-count">0 / 0</span></div><p class="section-subtitle">把大目标，拆成眼前的小事。</p><form id="task-form"><label class="sr-only" for="task-input">添加学习任务</label><input id="task-input" placeholder="接下来，想学些什么？" maxlength="120" autocomplete="off" required><button aria-label="添加任务" type="submit">＋</button></form><ul id="tasks"></ul><div id="empty" class="empty"><span aria-hidden="true">☷</span><p>清单还是空的</p><small>写下一件小事，开始今天的学习吧</small></div><div class="tasks-footer"><span>按自己的节奏，一件件完成</span><button id="clear-completed">清除已完成</button></div></section>
         </aside>
       </div>
+      </section>
+      <section id="page-words" class="view" hidden aria-label="背单词">
+        <div class="intro"><span class="eyebrow">A LITTLE EVERY DAY</span><h1>让词汇，一点点生根。</h1><p>六级常用进阶词 · 双语例句 · 间隔复习</p></div>
+        <div class="word-layout">
+          <div class="card word-main">
+            <div class="section-heading"><h2>今日词卡</h2><span id="word-position" class="pill"></span></div>
+            <div class="segmented" role="group" aria-label="学习范围"><button data-filter="learn" aria-pressed="true">今日学习</button><button data-filter="review" aria-pressed="false">到期复习 <span id="due-count"></span></button><button data-filter="wrong" aria-pressed="false">错词本 <span id="wrong-count"></span></button></div>
+            <div id="flash-area">
+              <button id="flashcard" class="flashcard" aria-expanded="false" aria-label="翻转单词卡，查看释义">
+                <span class="card-inner"><span class="card-face card-front"><span class="word-tag" id="word-tag">新词</span><strong id="word-en"></strong><span class="ipa" id="word-ipa"></span><span class="flip-hint">轻点卡片，查看释义 ↻</span></span><span class="card-face card-back"><span id="word-pos" class="word-tag"></span><strong id="word-meaning"></strong><span id="word-example"></span><span id="word-translation"></span><span class="flip-hint">轻点返回英文 ↻</span></span></span>
+              </button>
+              <button id="speak" class="speak">◖ 点击发音</button>
+              <div class="grades" role="group" aria-label="评价掌握程度"><button data-grade="unknown">不认识<span>10 分钟后</span></button><button data-grade="vague">模糊<span>30 分钟后</span></button><button data-grade="known">认识<span>延长复习间隔</span></button></div>
+              <small class="helper" id="grade-hint">先翻开卡片，再诚实评价自己，不必急着记住。</small>
+            </div>
+            <div id="word-empty" class="empty" hidden><span>✿</span><p id="word-empty-text"></p><small id="next-review"></small><button id="more-study" class="soft" data-go="pet">去小屋休息一下 →</button></div>
+          </div>
+          <div class="word-side">
+            <section class="card"><div class="section-heading"><h2>今天的小目标</h2><span id="new-progress" class="pill"></span></div><progress id="goal-progress" max="30" value="0"></progress><form id="goal-form" class="goal-form"><label for="daily-goal">每日新词</label><input id="daily-goal" type="number" min="1" max="200" required><button type="submit">保存</button></form><p class="helper">默认 30 新词；到期词优先。每完成 30 个新词，当天可领一次 20 金币 + 2 份食物。目标可按自己的节奏调整。</p></section>
+            <section class="card"><div class="section-heading"><h2>双向小测</h2><span id="quiz-count" class="pill"></span></div><p class="helper">仅测已学词；每词每方向每天计分一次，不发经验。</p><label class="select-label" for="quiz-direction">题型 <select id="quiz-direction"><option value="en-zh">英译中</option><option value="zh-en">中译英</option></select></label><p id="quiz-prompt" class="quiz-prompt"></p><div id="quiz-options" class="quiz-options"></div><p id="quiz-feedback" role="status"></p><button id="quiz-next" class="soft">下一题 →</button></section>
+            <details class="card"><summary>错词与复习计划</summary><p class="helper">认识后按 1、3、7、14、30、60 天复习；模糊 30 分钟、不认识 10 分钟后再见。错词答对到期词卡后移出错词本。小测答错也会收进错词本。</p><div id="wrong-list" class="wrong-list"></div></details>
+          </div>
+        </div>
+      </section>
+      <section id="page-pet" class="view" hidden aria-label="宠物">
+        <div class="intro"><span class="eyebrow">GROW TOGETHER, GENTLY</span><h1>小满的温柔小屋</h1><p>你向前一步，它也悄悄长大一点。</p></div>
+        <div class="pet-layout">
+          <section class="card pet-home"><div class="section-heading"><h2><span id="pet-name">小满</span> <span id="pet-level" class="pill"></span></h2><span id="pet-wallet"></span></div>
+            <label id="pet-picker-label" class="pet-picker" hidden>更换伙伴<select id="pet-picker"></select></label><div class="room" id="room"><div class="room-window"><span>☁</span></div><div class="room-shelf"></div><div id="decor-plant" class="decor plant" hidden aria-label="窗边绿植">♧</div><div id="decor-lamp" class="decor lamp" hidden aria-label="暖光台灯">◭</div><div id="decor-rug" class="decor rug" hidden></div><span class="sleep-z" aria-hidden="true">z Z</span>
+              <button id="pet-avatar" class="pet-avatar" aria-label="摸摸小满的头" title="摸摸小满的头"></button>
+              <span class="pet-hearts" aria-hidden="true">♡ ♥ ♡</span><span class="level-burst" id="level-burst" aria-hidden="true">✦ LEVEL UP ✦</span>
+
+              <span class="celebrate-stars" aria-hidden="true">✦ ♡ ✦</span><div class="room-floor"></div>
+            </div><p id="pet-message" class="pet-message" role="status">这里一直为你留着一盏灯，欢迎回来。</p><div class="pet-actions"><button data-pet="pat">♡ 摸摸头</button><button data-pet="feed">♧ 喂食</button><button data-pet="play">✧ 玩耍</button><button data-pet="sleep" id="sleep-button">☾ 睡觉</button></div><p class="helper">小满不会因缺勤而生病或离开；离线不扣状态。互动不发金币或经验。</p>
+          </section>
+          <div class="pet-side"><section class="card"><h2>一点点长大</h2><div class="pet-growth"><strong id="pet-xp"></strong><progress id="xp-progress" max="100" value="0"></progress><small>每 100 经验升 1 级</small></div><div id="pet-meters"></div><p class="helper">完成专注：25 经验 + 10 金币。正确复习到期词：2 经验（每词每天一次）。</p></section><section class="card"><h2>给小屋添点温暖</h2><div id="shop"></div></section></div>
+        </div><section class="card badges-card"><h2>一起收集的小成就</h2><div id="badges" class="badges"></div></section>
+      </section>
+      <section id="page-stats" class="view" hidden aria-label="统计与设置">
+        <div class="intro"><span class="eyebrow">EVERY SMALL STEP COUNTS</span><h1>看见自己的积累。</h1><p>备考、阅读与科研，都在慢慢发生。</p></div>
+        <div id="overview" class="overview"></div>
+        <div class="settings-layout"><section class="card"><h2>近 7 天学习</h2><div id="week-chart" class="week-chart" aria-label="最近七天的新词与复习记录"></div><p class="helper">柱高表示新词与词卡复习次数，具体数据见每天标签。</p><div id="all-stats" class="all-stats"></div></section>
+          <section class="card settings-card"><h2>让这里更适合你</h2><label>显示模式<select id="theme"><option value="system">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option></select></label><label class="check-setting"><span>减少动画效果</span><input type="checkbox" id="reduced-motion"></label><p class="helper">也会遵从设备的“减少动态效果”设置。</p><hr><h2>数据备份</h2><p class="helper">数据仅保存在此浏览器。定期导出，可在换设备时恢复。导入前会预览，并要求确认替换。</p><button id="export-data" class="soft">↓ 导出 JSON 备份</button><label class="import-label">↑ 选择 JSON 备份<input id="import-file" type="file" accept=".json,application/json"></label><div id="import-preview" hidden><p id="import-summary"></p><button id="confirm-import" class="primary">确认替换当前数据</button><button id="cancel-import" class="soft">取消</button></div><p id="storage-state" class="helper"></p><p class="helper">iPhone：发音需主动点击；声音取决于系统可用语音。锁屏时网页可能挂起，返回页面会校正计时，不保证后台响铃。</p></section></div>
+      </section>
       <p class="notice" id="notice" role="status" aria-live="polite"></p>
     </main>
     <footer><span class="leaf" aria-hidden="true">❧</span> 不必急着抵达，专注每一个当下。<span class="local-note">任务与记录仅保存在此浏览器</span></footer>
   </div>
+  <nav class="bottom-nav" aria-label="主导航"><button data-go="focus" aria-current="page"><span aria-hidden="true">◷</span>专注</button><button data-go="words"><span aria-hidden="true">▤</span>背单词</button><button data-go="pet"><span aria-hidden="true">♧</span>宠物</button><button data-go="stats"><span aria-hidden="true">▥</span>统计</button></nav>
+  <div id="celebration" class="celebration" role="status" hidden><div id="celebration-art" class="celebration-art" aria-hidden="true"></div><strong id="celebration-title">小满为你庆祝！</strong><span id="celebration-detail">完成专注 · +25 经验 · +10 金币</span><button data-go="pet">休息一下，去小屋 →</button><button id="dismiss-celebration" aria-label="关闭庆祝">×</button></div>
 </body>
 </html>
