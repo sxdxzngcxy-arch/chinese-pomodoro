@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f4ee">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="description" content="一枚安静的学习番茄钟。专注25分钟，休息5分钟，把今天的学习一点点完成。">
+  <title>一刻专注 · 学习番茄钟</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="page">
+    <header><a class="brand" href="./"><span class="brand-icon" aria-hidden="true">◷</span> 一刻专注</a><span class="header-note">留一点时间，给更好的自己</span><span class="date" id="date"></span></header>
+    <main>
+      <div class="intro"><span class="eyebrow">YOUR QUIET STUDY SPACE</span><h1>专注当下，慢慢进步。</h1><p>一次只做一件事，让每一份努力都有回响。</p></div>
+      <div class="workspace">
+        <section class="timer-card" aria-label="学习计时器">
+          <div class="mode-tabs" role="group" aria-label="选择计时模式"><button id="focus-mode" class="selected" aria-pressed="true">专注时间</button><button id="break-mode" aria-pressed="false">短暂休息</button></div>
+          <div class="clock"><svg viewBox="0 0 300 300" aria-hidden="true"><circle class="track" cx="150" cy="150" r="136"/><circle id="progress" cx="150" cy="150" r="136"/></svg><div class="clock-content"><span class="clock-label" id="clock-label">保持专注</span><div id="time" role="timer" aria-label="剩余25分钟">25:00</div><span class="clock-caption" id="clock-caption">给自己一段不被打扰的时间</span></div></div>
+          <div class="timer-actions"><button id="start" class="primary">开始专注 <span aria-hidden="true">▶</span></button><button id="reset" class="reset" aria-label="重置计时器" title="重置计时器">↻</button></div>
+          <p class="timer-tip"><span aria-hidden="true">✧</span> 小小的专注，也会积攒成大大的进步</p>
+        </section>
+        <aside>
+          <section class="stats-card"><div class="section-heading"><h2>今日积累</h2><span class="pill">每一步都算数</span></div><div class="stats"><div><strong id="count">0</strong><span>完成专注 / 次</span></div><div><strong id="minutes">0</strong><span>专注时长 / 分钟</span></div></div><div class="stats-footer"><span class="status-dot"></span><span id="encouragement">今天的第一份专注，从现在开始</span></div></section>
+          <section class="tasks-card"><div class="section-heading"><h2>学习清单</h2><span id="task-count" class="task-count">0 / 0</span></div><p class="section-subtitle">把大目标，拆成眼前的小事。</p><form id="task-form"><label class="sr-only" for="task-input">添加学习任务</label><input id="task-input" placeholder="接下来，想学些什么？" maxlength="120" autocomplete="off" required><button aria-label="添加任务" type="submit">＋</button></form><ul id="tasks"></ul><div id="empty" class="empty"><span aria-hidden="true">☷</span><p>清单还是空的</p><small>写下一件小事，开始今天的学习吧</small></div><div class="tasks-footer"><span>按自己的节奏，一件件完成</span><button id="clear-completed">清除已完成</button></div></section>
+        </aside>
+      </div>
+      <p class="notice" id="notice" role="status" aria-live="polite"></p>
+    </main>
+    <footer><span class="leaf" aria-hidden="true">❧</span> 不必急着抵达，专注每一个当下。<span class="local-note">任务与记录仅保存在此浏览器</span></footer>
+  </div>
+</body>
+</html>
