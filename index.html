@@ -6,23 +6,26 @@
   <meta name="theme-color" content="#f5f4ee">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="description" content="番茄钟、六级词汇和Q版泰迪小狗，陪你一点点完成备考与科研。">
-  <title>一刻专注 · 学习与陪伴</title>
+  <meta name="description" content="六级词汇、阅读、番茄钟与心境花园，陪你按自己的节奏学习。">
+  <title>六级喵 · 学习与心境伙伴</title>
   <link rel="stylesheet" href="styles.css">
   <script src="words.js" defer></script>
   <script src="learning-core.js" defer></script>
+  <script src="garden-core.js" defer></script>
   <script src="core.js" defer></script>
   <script src="memory-data.js" defer></script>
   <script src="reading-data.js" defer></script>
   <script src="pets.js" defer></script>
   <script src="app.js" defer></script>
   <script src="learning.js" defer></script>
+  <script src="garden.js" defer></script>
 </head>
 <body>
   <div class="page">
-    <header><a class="brand" href="./"><span class="brand-icon" aria-hidden="true">◷</span> 一刻专注</a><span class="header-note">留一点时间，给更好的自己</span><span class="date" id="date"></span></header>
+    <header><a class="brand" href="./"><span class="brand-icon" aria-hidden="true">◷</span> 六级喵</a><span class="header-note">留一点时间，给更好的自己</span><span class="date" id="date"></span><button class="garden-entry" data-go="garden" aria-label="进入心境花园">♧ 心境花园</button></header>
     <main>
       <section id="page-focus" class="view" aria-label="专注"><div class="intro"><span class="eyebrow">YOUR QUIET STUDY SPACE</span><h1>专注当下，慢慢进步。</h1><p>一次只做一件事，让每一份努力都有回响。</p></div>
+      <div class="garden-focus-entry"><div><strong>今天，按自己的节奏来。</strong><small id="focus-garden-mode">当前为标准模式建议 · 签到随时可以跳过</small></div><button class="soft" data-go="garden">进入花园 →</button></div>
       <div class="workspace">
         <section class="timer-card" aria-label="学习计时器">
           <div class="mode-tabs" role="group" aria-label="选择计时模式"><button id="focus-mode" class="selected" aria-pressed="true">专注时间</button><button id="break-mode" aria-pressed="false">短暂休息</button></div>
@@ -84,11 +87,54 @@
           <div class="pet-side"><section class="card"><h2>一点点长大</h2><div class="pet-growth"><strong id="pet-xp"></strong><progress id="xp-progress" max="100" value="0"></progress><small>每 100 经验升 1 级</small></div><div id="pet-meters"></div><p class="helper">完成专注：25 经验 + 10 金币。正确复习到期词：2 经验（每词每天一次）。</p></section><section class="card"><h2>给小屋添点温暖</h2><div id="shop"></div></section></div>
         </div><section class="card badges-card"><h2>一起收集的小成就</h2><div id="badges" class="badges"></div></section>
       </section>
+      <section id="page-garden" class="view garden-view" hidden aria-label="心境花园">
+        <div class="intro"><span class="eyebrow">A SOFTER SPACE TO BEGIN</span><h1>先照顾此刻的自己。</h1><p>学习可以有不同的节奏，休息也有它的位置。</p></div>
+        <p class="garden-privacy-intro">自愿填写，仅保存在此浏览器。不作诊断或健康预测，也不影响小满的成长。</p>
+        <div class="garden-layout">
+          <div class="garden-left">
+            <section class="card garden-checkin"><div class="section-heading"><h2>此刻的我</h2><span class="pill">可以跳过</span></div><p id="garden-editing" class="helper">只有点“保存记录”才会留下签到；每天一条，再次保存更新当天。日记可以不写。</p>
+              <form id="garden-form">
+                <fieldset><legend>现在更接近哪一种感受？</legend><div class="feeling-choices">
+                  <label><input type="radio" name="garden-feeling" value="happy" required><span><i aria-hidden="true">☀</i>愉快</span></label>
+                  <label><input type="radio" name="garden-feeling" value="calm"><span><i aria-hidden="true">☁</i>平静</span></label>
+                  <label><input type="radio" name="garden-feeling" value="anxious"><span><i aria-hidden="true">≈</i>焦虑</span></label>
+                  <label><input type="radio" name="garden-feeling" value="low"><span><i aria-hidden="true">☂</i>低落</span></label>
+                  <label><input type="radio" name="garden-feeling" value="irritable"><span><i aria-hidden="true">✷</i>烦躁</span></label>
+                </div></fieldset>
+                <fieldset><legend>给自己估一估，精力有多少？</legend><div class="energy-choices">
+                  <label><input type="radio" name="garden-energy" value="1" required><span>1</span></label><label><input type="radio" name="garden-energy" value="2"><span>2</span></label><label><input type="radio" name="garden-energy" value="3"><span>3</span></label><label><input type="radio" name="garden-energy" value="4"><span>4</span></label><label><input type="radio" name="garden-energy" value="5"><span>5</span></label>
+                </div><div class="energy-labels"><span>想省一点力气</span><span>精力较充足</span></div></fieldset>
+                <label class="garden-note-label" for="garden-note">留一句话给今天（选填）<textarea id="garden-note" maxlength="280" rows="3" placeholder="也可以什么都不写。" spellcheck="false"></textarea></label><small id="garden-note-count" class="helper">0 / 280</small>
+                <div class="inline-actions"><button type="submit" class="primary" id="save-garden-entry">保存记录</button><button type="button" class="soft" id="skip-garden">跳过，去学习</button><button type="button" class="soft" id="cancel-garden-edit" hidden>取消修改</button></div>
+              </form><p id="garden-status" role="status" aria-live="polite" class="garden-inline-status"></p>
+            </section>
+            <section class="card garden-mode-card"><div class="section-heading"><h2>选择今天的步调</h2><span class="pill">随时可改</span></div><p id="garden-recommendation" class="helper">填好感受和精力后，这里会给一个可选建议。也可以直接选择模式。</p><button id="adopt-garden-recommendation" class="soft" hidden>采用这个建议</button>
+              <fieldset class="garden-mode-field"><legend class="sr-only">手动选择学习模式</legend><div class="garden-modes">
+                <label><input type="radio" name="garden-mode" value="light"><span><strong>轻量</strong><small>5 分钟词卡 · 少量复习 · 小休息</small></span></label>
+                <label><input type="radio" name="garden-mode" value="standard" checked><span><strong>标准</strong><small>原设番茄钟 · 单词或一篇阅读</small></span></label>
+                <label><input type="radio" name="garden-mode" value="sprint"><span><strong>冲刺</strong><small>限时仔细阅读 · 核对依据与错因</small></span></label>
+              </div></fieldset><p id="garden-mode-description" class="helper"></p><p class="helper">切换模式只改变建议，不会重置计时、调整每日词量或限制功能。</p>
+              <div class="inline-actions"><button id="garden-prepare-focus" class="soft">准备本次专注</button><button class="soft" data-go="words">去背单词</button><button class="soft" data-go="reading">去阅读</button></div>
+              <div id="garden-focus-confirm" class="garden-confirm" hidden><p id="garden-focus-confirm-text"></p><button id="garden-confirm-focus" class="soft">确认重置并准备</button><button id="garden-keep-focus" class="soft">保留计时并返回专注</button></div>
+            </section>
+          </div>
+          <div class="garden-right">
+            <section class="card garden-breath-card"><div class="section-heading"><h2>给自己一小段留白</h2><span class="pill">全程静音</span></div><p class="helper">可跟随 4 秒吸气、6 秒呼气，不屏息；也可以选择自然呼吸，随时停止。</p>
+              <div class="breath-options"><label for="garden-breath-duration">时长<select id="garden-breath-duration"><option value="60">1 分钟</option><option value="120">2 分钟</option><option value="180">3 分钟</option></select></label><label for="garden-breath-style">方式<select id="garden-breath-style"><option value="paced">轻柔节奏</option><option value="natural">自然呼吸</option></select></label></div>
+              <div class="garden-breath-scene"><div id="garden-breath-orb" class="garden-breath-orb" aria-hidden="true"><span>♧</span></div></div><p id="garden-breath-phase" class="garden-breath-phase" role="status" aria-live="polite">准备好了再开始</p><p id="garden-breath-time" class="garden-breath-time" role="timer" aria-live="off">01:00</p>
+              <div class="inline-actions breath-actions"><button id="garden-breath-start" class="primary">开始引导</button><button id="garden-breath-pause" class="soft" disabled>暂停</button><button id="garden-breath-stop" class="soft">停止，回到自然呼吸</button><button id="garden-breath-natural" class="soft">改为自然呼吸</button></div>
+              <div class="garden-breath-foot"><label><input id="garden-reduced-motion" type="checkbox">减少动画</label><button id="garden-quick-exit" class="soft">停止并返回专注 →</button></div><p class="helper">切出花园或进入后台会暂停。刷新后恢复最近保存的进度，不计后台完成，也不发放奖励。</p><div class="garden-grounding"><strong>不想跟随呼吸，也可以：</strong><p>松一松肩膀，感受双脚接触地面；看看周围，留意一种颜色。什么都不做也可以。</p></div>
+            </section>
+            <section class="card garden-data-card"><h2>留在自己的设备上</h2><p class="helper">感受和日记只保存在此浏览器，没有登录或上传。清除浏览器数据或更换设备可能丢失记录；导出的文件也包含私人内容，请自行保管。</p><div class="inline-actions"><button id="export-garden" class="soft">导出心境 JSON</button><button id="clear-garden" class="soft">清除心境记录</button></div><div id="clear-garden-confirm" class="garden-confirm" hidden><p>只清除心境记录及本站保存的恢复副本中的心境记录。学习、宠物与奖励不变，已下载的备份文件不会被删除。</p><button id="confirm-clear-garden" class="soft">确认清除心境记录</button><button id="cancel-clear-garden" class="soft">取消</button></div><p class="helper">完整学习备份仍在“统计”页。导入旧备份时，现有心境默认保留。</p></section>
+          </div>
+        </div>
+        <section class="card garden-history-card"><div class="section-heading"><h2>最近 7 天，自愿留下的片刻</h2><span id="garden-history-count" class="pill"></span></div><p class="helper">没有签到的日子留白，不评判、不补扣任何成长。</p><div id="garden-history"></div></section>
+      </section>
       <section id="page-stats" class="view" hidden aria-label="统计与设置">
         <div class="intro"><span class="eyebrow">EVERY SMALL STEP COUNTS</span><h1>看见自己的积累。</h1><p>备考、阅读与科研，都在慢慢发生。</p></div>
         <div id="overview" class="overview"></div>
         <div class="settings-layout"><section class="card"><h2>近 7 天学习</h2><div id="week-chart" class="week-chart" aria-label="最近七天的新词与复习记录"></div><p class="helper">柱高表示新词与词卡复习次数，具体数据见每天标签。</p><div id="all-stats" class="all-stats"></div></section>
-          <section class="card settings-card"><h2>让这里更适合你</h2><label>显示模式<select id="theme"><option value="system">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option></select></label><label class="check-setting"><span>减少动画效果</span><input type="checkbox" id="reduced-motion"></label><p class="helper">也会遵从设备的“减少动态效果”设置。</p><hr><h2>数据备份</h2><p class="helper">数据仅保存在此浏览器。定期导出，可在换设备时恢复。导入前会预览，并要求确认替换。</p><button id="export-data" class="soft">↓ 导出 JSON 备份</button><label class="import-label">↑ 选择 JSON 备份<input id="import-file" type="file" accept=".json,application/json"></label><div id="import-preview" hidden><p id="import-summary"></p><button id="confirm-import" class="primary">确认替换当前数据</button><button id="cancel-import" class="soft">取消</button></div><p id="storage-state" class="helper"></p><p class="helper">iPhone：发音需主动点击；声音取决于系统可用语音。锁屏时网页可能挂起，返回页面会校正计时，不保证后台响铃。</p></section></div>
+          <section class="card settings-card"><h2>让这里更适合你</h2><label>显示模式<select id="theme"><option value="system">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option></select></label><label class="check-setting"><span>减少动画效果</span><input type="checkbox" id="reduced-motion"></label><p class="helper">也会遵从设备的“减少动态效果”设置。</p><hr><h2>数据备份</h2><p class="helper">完整备份包含已保存的心境与日记，在本机生成，不上传。导入前先校验和预览；学习部分确认后替换并保留恢复副本，心境默认保留。</p><button id="export-data" class="soft">↓ 导出 JSON 备份</button><label class="import-label">↑ 选择 JSON 备份<input id="import-file" type="file" accept=".json,application/json"></label><div id="import-preview" hidden><p id="import-summary"></p><label id="restore-garden-label" class="restore-garden-label" hidden><input id="restore-garden" type="checkbox">同时合并备份中的心境记录（同日期保留本机记录）</label><button id="confirm-import" class="primary">确认替换当前数据</button><button id="cancel-import" class="soft">取消</button></div><p id="storage-state" class="helper"></p><p class="helper">iPhone：发音需主动点击；声音取决于系统可用语音。锁屏时网页可能挂起，返回页面会校正计时，不保证后台响铃。</p></section></div>
       </section>
       <p class="notice" id="notice" role="status" aria-live="polite"></p>
     </main>

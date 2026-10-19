@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const C=StudyCore, L=LearningCore, wordIds=new Set(WORDS.map(w=>w.id)), $=id=>document.getElementById(id);
+const C=StudyCore, L=LearningCore, G=GardenCore, wordIds=new Set(WORDS.map(w=>w.id)), $=id=>document.getElementById(id);
 let words=WORDS;
 const learningQueue=(s,kind,now)=>L.queue(s,L.catalog(WORDS,s.study),kind,now,C.queue,C.day(now));
 let state, busy=false, storageBlocked=false, storageUnavailable=false, filter='learn', current=null, revealed=false, quizQuestion=null, importCandidate=null, page='focus', lastDay=C.day(), quizDirection='en-zh';
@@ -24,7 +24,7 @@ function write(next){
  if(storageUnavailable){state=next;return;}
  localStorage.setItem(C.KEY,JSON.stringify(next));state=next;
 }
-async function transact(action,{restore=false}={}){
+async function transact(action,{restore=false,settleTimer=true}={}){
  if(busy)return false;busy=true;
  try{
   const work=()=>{
@@ -32,7 +32,7 @@ async function transact(action,{restore=false}={}){
    const next=read();if(storageBlocked&&!restore)throw Error('请先处理异常的保存数据。');
    const previousLevel=1+Math.floor(next.pet.xp/100);
    const previousDaily=Object.keys(next.ledger).filter(k=>k.startsWith('daily30:')).length;
-   const finished=restore?false:C.settle(next,Date.now());
+   const finished=restore||!settleTimer?false:C.settle(next,Date.now());
    const result=action(next,finished);
    next.revision++;write(next);
    if(finished==='focus')celebrate();else if(finished==='break')notify('休息结束。准备好了，再开启下一段专注吧。');
@@ -56,10 +56,11 @@ function applyTheme(){
  $('theme').value=selected;$('reduced-motion').checked=state.settings.reduced;
 }
 function navigate(next){
- if(!['focus','words','reading','pet','stats'].includes(next))next='focus';page=next;
+ if(!['focus','words','reading','pet','stats','garden'].includes(next))next='focus';const previous=page;page=next;window.GardenUI?.onNavigate(previous,next);
  document.querySelectorAll('.view').forEach(el=>{el.hidden=el.id!==`page-${page}`;});
  document.querySelectorAll('.bottom-nav button').forEach(el=>{if(el.dataset.go===page)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});
  if(location.hash!==`#${page}`)history.replaceState(null,'',`#${page}`);
+ document.querySelectorAll('.garden-entry').forEach(el=>{if(page==='garden')el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});
  $('celebration').hidden=true;renderAll();window.scrollTo({top:0,behavior:'instant'});
 }
 function renderTimer(){
@@ -72,7 +73,7 @@ function renderTimer(){
  $('clock-caption').textContent=t.mode==='focus'?'给自己一段不被打扰的时间':'伸个懒腰，让思绪透透气';
  $('start').textContent=t.endAt!==null?'暂停计时  Ⅱ':t.remaining<t.total?'继续计时  ▶':t.mode==='focus'?'开始专注  ▶':'开始休息  ▶';
  $('companion-text').textContent=t.mode==='break'?'休息时间，去小屋摸摸小满吧。':'完成专注，为小狗积攒成长能量。';
- document.title=`${t.endAt!==null?formatted+' · ':''}一刻专注 · 学习与陪伴`;
+ document.title=`${t.endAt!==null?formatted+' · ':''}六级喵 · 学习与心境伙伴`;
 
 }
 function renderFocusStats(){
@@ -168,7 +169,7 @@ function renderStats(){
  $('all-stats').textContent=`当前词库已学 ${words.filter(w=>state.progress[w.id]).length} / ${words.length} 词 · 累计专注 ${Object.values(state.counts).reduce((a,b)=>a+b,0)} 次 / ${Object.values(state.focusMinutes).reduce((a,b)=>a+b,0)} 分钟。断签不会扣除记录或宠物状态。`;
  $('storage-state').textContent=storageBlocked?'原始数据异常，写入已暂停。导出会保留原始文本。':storageUnavailable?'内存模式：离开前务必导出。':navigator.locks?'本地自动保存已启用；多标签操作通过浏览器锁串行结算。':'本地自动保存已启用。此浏览器不支持跨标签锁，请只打开一个页面，避免同时修改。';
 }
-function renderAll(){words=L.catalog(WORDS,state.study);if(!$('time-form').contains(document.activeElement)){$('focus-length').value=state.settings.focus;$('break-length').value=state.settings.break;}applyTheme();renderTimer();renderFocusStats();renderTasks();renderWords();renderPet();renderStats();window.LearningUI?.render();}
+function renderAll(){words=L.catalog(WORDS,state.study);if(!$('time-form').contains(document.activeElement)){$('focus-length').value=state.settings.focus;$('break-length').value=state.settings.break;}applyTheme();renderTimer();renderFocusStats();renderTasks();renderWords();renderPet();renderStats();window.LearningUI?.render();window.GardenUI?.render();}
 const animationTimers={};
 function animatePet(kind,ms=1900){
  const room=$('room');room.classList.remove(kind);void room.offsetWidth;room.classList.add(kind);clearTimeout(animationTimers[kind]);animationTimers[kind]=setTimeout(()=>room.classList.remove(kind),ms);
@@ -233,29 +234,35 @@ $('export-data').addEventListener('click',()=>{
   const snapshot=clone(state),now=Date.now();
   if(snapshot.timer.endAt!==null){snapshot.timer.remaining=Math.max(1,C.remaining(snapshot,now));snapshot.timer.endAt=null;}
   for(const d of Object.values(snapshot.study.reading.drafts)){d.elapsed=L.readingElapsed(d,now);d.runningSince=null;}
+  G.pause(snapshot.garden,now);
   const data=storageBlocked?(localStorage.getItem(C.KEY)||localStorage.getItem(C.LEGACY)):JSON.stringify({...snapshot,exportedAt:new Date(now).toISOString()},null,2);
   download(data||'{}',`yike-backup-${C.day()}.json`);notify('已生成备份。备份中的活动计时已暂停，当前页面仍可继续。iPhone 可保存到“文件”App。');
  }catch(e){notify(`导出失败：${e.message}`);}
 });
 $('import-file').addEventListener('change',async()=>{
- importCandidate=null;$('import-preview').hidden=true;const file=$('import-file').files[0];if(!file)return;
- try{if(file.size>10*1024*1024)throw Error('备份超过 10MB 限制。');const raw=JSON.parse(await file.text());importCandidate=C.normalize(raw,wordIds);$('import-summary').textContent=`即将替换：${importCandidate.tasks.length} 个任务、${Object.keys(importCandidate.progress).length} 个单词进度、${Object.values(importCandidate.counts).reduce((a,b)=>a+b,0)} 次专注、${importCandidate.pet.coins} 金币、${importCandidate.study.customWords.length} 个个人词、${Object.keys(importCandidate.study.reading.last).length} 篇阅读记录。建议先导出当前数据。导入会停止备份中的活动计时并按其剩余时间暂停。`;$('import-preview').hidden=false;}catch(e){notify(`未导入：${e.message}`);}finally{$('import-file').value='';}
+ importCandidate=null;$('import-preview').hidden=true;$('restore-garden').checked=false;$('restore-garden-label').hidden=true;const file=$('import-file').files[0];if(!file)return;
+ try{if(file.size>10*1024*1024)throw Error('备份超过 10MB 限制。');const raw=JSON.parse(await file.text());importCandidate=C.normalize(raw,wordIds);$('restore-garden-label').hidden=raw.garden===undefined;$('import-summary').textContent=`即将替换：${importCandidate.tasks.length} 个任务、${Object.keys(importCandidate.progress).length} 个单词进度、${Object.values(importCandidate.counts).reduce((a,b)=>a+b,0)} 次专注、${importCandidate.pet.coins} 金币、${importCandidate.study.customWords.length} 个个人词、${Object.keys(importCandidate.study.reading.last).length} 篇阅读记录。学习部分会替换并保留本机恢复副本。心境默认保留；可选合并备份中的 ${importCandidate.garden.entries.length} 条心境，同日期保留本机记录。导入会暂停备份计时。`;$('import-preview').hidden=false;}catch(e){notify(`未导入：${e.message}`);}finally{$('import-file').value='';}
 });
 $('cancel-import').addEventListener('click',()=>{importCandidate=null;$('import-preview').hidden=true;});
 $('confirm-import').addEventListener('click',async()=>{
- if(!importCandidate||busy)return;const replacement=clone(importCandidate);
+ if(!importCandidate||busy)return;const replacement=clone(importCandidate),mergeGarden=$('restore-garden').checked;
  if(replacement.timer.endAt!==null){replacement.timer.remaining=Math.max(1,C.remaining(replacement,Date.now()));replacement.timer.endAt=null;}
  for(const d of Object.values(replacement.study.reading.drafts)){d.elapsed=L.readingElapsed(d,Date.now());d.runningSince=null;}
  const ok=await transact(s=>{
   if(!storageUnavailable){const prior=localStorage.getItem(C.KEY);if(prior!==null)localStorage.setItem(`${C.KEY}-before-import`,prior);}
-  Object.assign(s,replacement);
+  const currentGarden=s.garden;Object.assign(s,replacement);s.garden=mergeGarden?G.merge(currentGarden,replacement.garden):currentGarden;
  },{restore:true});
  if(ok){storageBlocked=false;importCandidate=null;current=null;quizQuestion=null;revealed=false;$('import-preview').hidden=true;renderAll();notify('备份已恢复；导入前的已保存数据也保留在本地恢复副本中。');}
 });
 $('dismiss-celebration').addEventListener('click',()=>{$('celebration').hidden=true;});
 window.addEventListener('storage',e=>{if(e.key===C.KEY&&!busy){state=read();current=null;quizQuestion=null;renderAll();}});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){state=read();tick();renderAll();}});window.addEventListener('pageshow',()=>tick());
-window.StudyApp={getState:()=>state,transact,notify,node,button,navigate,getCurrent:()=>current,refreshWords:()=>{current=null;revealed=false;words=L.catalog(WORDS,state.study);renderWords(true);},download};
+function scrubGardenCopies(day=null){
+ if(storageUnavailable)return;
+ const keys=[`${C.KEY}-before-import`,`${C.KEY}-before-v1.1`];
+ for(const key of keys){const raw=localStorage.getItem(key);if(!raw)continue;const copy=JSON.parse(raw);if(!copy.garden)continue;if(!Array.isArray(copy.garden.entries))throw Error('本地恢复副本中的心境格式异常，未完成清除。');copy.garden.entries=day?copy.garden.entries.filter(e=>e.day!==day):[];localStorage.setItem(key,JSON.stringify(copy));}
+}
+window.StudyApp={getState:()=>state,getPage:()=>page,isBusy:()=>busy,scrubGardenCopies,transact,notify,node,button,navigate,getCurrent:()=>current,refreshWords:()=>{current=null;revealed=false;words=L.catalog(WORDS,state.study);renderWords(true);},download};
 state=read();
 if(!storageBlocked&&!storageUnavailable){try{const previous=localStorage.getItem(C.KEY);if(!previous||!JSON.parse(previous).study){if(previous&&!localStorage.getItem(`${C.KEY}-before-v1.1`))localStorage.setItem(`${C.KEY}-before-v1.1`,previous);write(state);}}catch(e){notify('升级数据暂未保存，请检查存储空间并导出备份。');}}
 navigate(location.hash.slice(1)||'focus');tick();setInterval(tick,1000);

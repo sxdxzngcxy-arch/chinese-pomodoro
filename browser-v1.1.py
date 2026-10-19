@@ -1,12 +1,13 @@
 """V1.1 浏览器回归；运行前在 8081 端口提供本目录。"""
 from pathlib import Path
-import json
+import json, os
+BASE=os.environ.get("POMODORO_TEST_URL","http://127.0.0.1:8082")
 from playwright.sync_api import sync_playwright, expect
 with sync_playwright() as p:
  browser=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
  ctx=browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True,device_scale_factor=2,accept_downloads=True)
  page=ctx.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
- page.goto('http://127.0.0.1:8081');page.wait_for_selector('#start')
+ page.goto(BASE);page.wait_for_selector('#start')
  assert page.locator('.bottom-nav button').count()==5
  # 原版 v2 数据自动扩展，宠物/任务/计时不丢失；升级前快照存在。
  page.evaluate("""() => {let s=StudyCore.fresh();delete s.study;s.pet.xp=177;s.pet.coins=42;s.tasks=[{id:'keep',text:'保留科研任务',done:false}];s.timer.remaining=1234;localStorage.setItem(StudyCore.KEY,JSON.stringify(s));} """)

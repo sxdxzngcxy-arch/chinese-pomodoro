@@ -1,13 +1,14 @@
 """本地 Chromium/WebKit（若已安装）端到端检查；需先在 8081 端口启动静态服务器。"""
 from pathlib import Path
-import json
+import json, os
+BASE=os.environ.get("POMODORO_TEST_URL","http://127.0.0.1:8082")
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).parent
 with sync_playwright() as p:
  browser=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
  context=browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True,device_scale_factor=2,accept_downloads=True)
  page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
- page.goto('http://127.0.0.1:8081');page.wait_for_selector('#start')
+ page.goto(BASE);page.wait_for_selector('#start')
  assert page.locator('#time').inner_text()=='25:00'
  # 旧数据迁移不丢失
  page.evaluate("""() => {localStorage.clear();localStorage.setItem('yike-pomodoro-v1',JSON.stringify({tasks:[{id:'old',text:'阅读科研论文',done:false}],counts:{'2026-10-18':2},timer:{mode:'focus',remaining:1500,endAt:null}}));} """)
@@ -76,7 +77,7 @@ with sync_playwright() as p:
  # 两标签同一到期 session 只发一次奖励
  page.evaluate("""() => {let s=JSON.parse(localStorage.getItem('yike-study-v2'));s.timer={mode:'focus',id:'two-tabs',endAt:Date.now()+300,total:1200,remaining:1200};localStorage.setItem('yike-study-v2',JSON.stringify(s));} """)
  before=page.evaluate("JSON.parse(localStorage.getItem('yike-study-v2')).pet.xp")
- tab=context.new_page();tab.goto('http://127.0.0.1:8081');page.reload();page.wait_for_timeout(1800)
+ tab=context.new_page();tab.goto(BASE);page.reload();page.wait_for_timeout(1800)
  assert page.evaluate("JSON.parse(localStorage.getItem('yike-study-v2')).pet.xp")==before+25
  # 泰迪外观、点击摸头、升级动画与减少动态效果
  page.evaluate("""() => {let s=JSON.parse(localStorage.getItem('yike-study-v2'));s.pet.xp=99;s.pet.sleeping=false;s.pet.cooldowns={};s.settings.reduced=false;s.timer={mode:'focus',id:'level-up-test',endAt:Date.now()-1,total:1200,remaining:1200};localStorage.setItem('yike-study-v2',JSON.stringify(s));} """)
