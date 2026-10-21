@@ -7,9 +7,12 @@ const num=(v,max=1e15)=>Number.isFinite(v)&&v>=0&&v<=max;
 const int=(v,max=1e9)=>Number.isSafeInteger(v)&&num(v,max);
 const text=(v,max=4000)=>typeof v==='string'&&v.length<=max;
 const copy=x=>JSON.parse(JSON.stringify(x));
+let external={words:[],articles:[]};
+function setExternalCatalog(value){external={words:value.words||[],articles:value.articles||[]};}
 const canonical=w=>String(w).trim().toLowerCase().replace(/[’]/g,"'").replace(/\s+/g,' ');
 const reasons=['词汇','定位','推断','主旨','同义替换','时间不足'];
-const fresh=()=>({schema:1,order:'random',seed:Math.random().toString(36).slice(2),accent:'en-GB',customWords:[],favorites:[],readingPacks:[],reading:{drafts:{},records:{},last:{}}});
+const vocabularyFresh=()=>({schema:1,reviewGoal:30,active:null,history:[],days:{},practiceTimes:{}});
+const fresh=()=>({schema:1,order:'random',seed:Math.random().toString(36).slice(2),accent:'en-GB',customWords:[],favorites:[],readingPacks:[],reading:{drafts:{},records:{},last:{}},vocabulary:vocabularyFresh()});
 function shuffle(items,random=Math.random){const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function seeded(key){let h=2166136261;for(const c of key){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return()=>{h+=0x6D2B79F5;let t=Math.imul(h^h>>>15,1|h);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
 function word(raw,{pending=false}={}){
@@ -20,7 +23,7 @@ function word(raw,{pending=false}={}){
  for(const key of ['ipa','pos','meaning','example','translation','collocations','association','source']){const v=raw[key]??'';if(!text(v,key==='pos'?100:2000))throw Error(`${name} 的 ${key} 过长或格式无效。`);w[key]=v.trim();}
  w.pending=!w.meaning;return w;
 }
-function catalog(builtin,study,{includePending=false}={}){const names=new Set(builtin.map(w=>canonical(w.word)));return [...builtin,...study.customWords.filter(w=>!names.has(canonical(w.word))&&(includePending||!w.pending))];}
+function catalog(builtin,study,{includePending=false}={}){const names=new Set();return [...builtin,...study.customWords,...external.words].filter(w=>{const name=canonical(w.word);if(names.has(name)||(!includePending&&w.pending))return false;names.add(name);return true;});}
 function addWord(s,raw,builtin,{pending=false}={}){
  const w=word(raw,{pending});const existing=catalog(builtin,s.study,{includePending:true}).find(x=>canonical(x.word)===w.word);
  if(existing)return {added:false,word:existing};
@@ -40,7 +43,7 @@ function queue(s,words,kind,now,baseQueue,day){
  return combined;
 }
 function status(p){if(!p)return '未学';if(p.wrong)return p.lastGrade==='vague'?'模糊':'不认识';return p.stage>=3?'已掌握':'认识';}
-function parseCSV(input){
+function parseCSV(input,{mapHeaders=h=>h}={}){
  const rows=[];let row=[],field='',quoted=false,afterQuote=false;
  const push=()=>{row.push(field);field='';afterQuote=false;};
  input=input.replace(/^\uFEFF/,'');
@@ -53,7 +56,7 @@ function parseCSV(input){
  }
  if(quoted)throw Error('CSV 存在未闭合引号。');push();if(row.some(x=>x.trim()))rows.push(row);
  if(rows.length<2)throw Error('CSV 需要表头和至少一条数据。');
- const headers=rows.shift().map(h=>h.trim());if(!headers.includes('word')||!headers.includes('meaning')||new Set(headers).size!==headers.length||headers.some(h=>!safe(h)))throw Error('CSV 表头需要唯一的 word 和 meaning 字段。');
+ const headers=rows.shift().map(h=>mapHeaders(h.trim()));if(!headers.includes('word')||!headers.includes('meaning')||new Set(headers).size!==headers.length||headers.some(h=>!safe(h)))throw Error('CSV 表头需要唯一的 word 和 meaning 字段。');
  return rows.map((r,i)=>{if(r.length!==headers.length)throw Error(`CSV 第 ${i+2} 行的列数不一致。`);return Object.fromEntries(headers.map((h,j)=>[h,r[j]]));});
 }
 function previewWords(input,filename,existing){
@@ -81,7 +84,7 @@ function article(raw){
   a.questions.push({id:q.id,type:'single-choice',stem:q.stem,options,answer:q.answer,explanation:{summary:e.summary,paraphrase:e.paraphrase,evidence,distractors}});
  }return a;
 }
-function readingCatalog(builtin,study){return [...builtin,...study.readingPacks.filter(a=>!builtin.some(b=>a.id===b.id))];}
+function readingCatalog(builtin,study){const ids=new Set();return [...builtin,...study.readingPacks,...external.articles].filter(a=>{if(ids.has(a.id))return false;ids.add(a.id);return true;});}
 function startReading(s,a,now,wrongOnly=false){
  const ids=a.questions.filter(q=>!wrongOnly||s.study.reading.records[a.id]?.[q.id]?.lastCorrect===false).map(q=>q.id);
  if(!ids.length)throw Error('暂时没有可重练的错题。');
@@ -96,6 +99,29 @@ function submitReading(s,a,draftId,now){
  s.ledger[`reading:${draftId}`]=now;
  const result={id:draftId,questionIds:[...d.questionIds],answers:{...d.answers},correct,total:questions.length,elapsed:readingElapsed(d,now),submittedAt:now};
  s.study.reading.last[a.id]=result;delete s.study.reading.drafts[a.id];return result;
+}
+function normalizeVocabulary(raw){
+ if(raw===undefined)return vocabularyFresh();
+ if(!obj(raw)||raw.schema!==1||!int(raw.reviewGoal,200)||!Array.isArray(raw.history)||raw.history.length>100||!obj(raw.days))throw Error('词汇学习记录无效。');
+ const v=vocabularyFresh();v.reviewGoal=raw.reviewGoal;
+ if(raw.practiceTimes!==undefined){if(!obj(raw.practiceTimes)||Object.keys(raw.practiceTimes).length>10000)throw Error('错词练习顺序记录无效。');for(const [id,at]of Object.entries(raw.practiceTimes)){if(!safe(id)||!num(at))throw Error('错词练习时间无效。');v.practiceTimes[id]=at;}}
+ const grades=['known','vague','unknown'];
+ const date=k=>/^\d{4}-\d{2}-\d{2}$/.test(k)&&!Number.isNaN(Date.parse(k));
+ function summary(r){
+  if(!obj(r)||!safe(r.id)||!['learn','review','wrong'].includes(r.kind)||!['sequence','random','weak'].includes(r.order)||!date(r.day)||!num(r.startedAt)||!num(r.finishedAt)||r.finishedAt<r.startedAt||!int(r.total,400)||!int(r.skipped,r.total)||!int(r.practice,r.total)||grades.some(g=>!int(r[g],r.total))||r.known+r.vague+r.unknown+r.skipped!==r.total)throw Error('词汇轮次结果无效。');
+  return Object.fromEntries(['id','kind','order','day','startedAt','finishedAt','total','skipped','practice',...grades].map(k=>[k,r[k]]));
+ }
+ v.history=raw.history.map(summary);if(new Set(v.history.map(h=>h.id)).size!==v.history.length)throw Error('词汇历史轮次重复。');
+ if(raw.active!==null){
+  const a=raw.active;if(!obj(a)||!safe(a.id)||!['learn','review','wrong'].includes(a.kind)||!['sequence','random','weak'].includes(a.order)||!date(a.day)||!num(a.startedAt)||!int(a.newGoal,200)||a.newGoal<1||!Array.isArray(a.items)||!a.items.length||a.items.length>400||!int(a.index,a.items.length)||typeof a.revealed!=='boolean'||new Set(a.items.map(i=>i?.id)).size!==a.items.length)throw Error('词汇学习轮次无效。');
+  const items=a.items.map((i,n)=>{if(!obj(i)||!safe(i.id)||!['new','review','practice'].includes(i.mode)||!(i.grade===null||grades.includes(i.grade))||typeof i.skipped!=='boolean'||!(i.nextDue===null||num(i.nextDue))||(n<a.index?!i.skipped&&i.grade===null:i.skipped||i.grade!==null)||(i.skipped&&i.grade!==null))throw Error('词汇卡片记录无效。');return {id:i.id,mode:i.mode,grade:i.grade,skipped:i.skipped,nextDue:i.nextDue};});
+  v.active={id:a.id,kind:a.kind,order:a.order,day:a.day,startedAt:a.startedAt,newGoal:a.newGoal,index:a.index,revealed:a.revealed,items};
+ }
+ for(const [k,d]of Object.entries(raw.days)){
+  if(!date(k)||!obj(d)||!Array.isArray(d.reviewed)||d.reviewed.length>10000||d.reviewed.some(id=>!safe(id))||new Set(d.reviewed).size!==d.reviewed.length||!int(d.baselineReviews)||grades.some(g=>!int(d[g]))||!int(d.practice)||!int(d.quizAttempts)||!int(d.quizCorrect,d.quizAttempts))throw Error('词汇每日明细无效。');
+  v.days[k]={baselineReviews:d.baselineReviews,reviewed:[...d.reviewed],known:d.known,vague:d.vague,unknown:d.unknown,practice:d.practice,quizAttempts:d.quizAttempts,quizCorrect:d.quizCorrect};
+ }
+ return v;
 }
 function normalize(raw){
  if(raw===undefined)return fresh();if(!obj(raw)||raw.schema!==1)throw Error('V1.1 学习扩展数据版本无效。');
@@ -117,8 +143,8 @@ function normalize(raw){
  for(const[id,r]of Object.entries(raw.reading.last)){
   if(!obj(r)||!safe(r.id)||!Array.isArray(r.questionIds)||r.questionIds.some(x=>!safe(x))||!obj(r.answers)||!int(r.total,30)||!int(r.correct,r.total)||!num(r.elapsed)||!num(r.submittedAt)||Object.entries(r.answers).some(([k,v])=>!safe(k)||!safe(v)))throw Error('阅读结果无效。');s.reading.last[id]={id:r.id,questionIds:[...r.questionIds],answers:{...r.answers},correct:r.correct,total:r.total,elapsed:r.elapsed,submittedAt:r.submittedAt};
  }
- return s;
+ s.vocabulary=normalizeVocabulary(raw.vocabulary);return s;
 }
-const api={fresh,normalize,canonical,word,catalog,addWord,shuffle,seeded,queue,status,parseCSV,previewWords,article,readingCatalog,startReading,readingElapsed,submitReading,reasons,copy};
+const api={setExternalCatalog,fresh,normalize,canonical,word,catalog,addWord,shuffle,seeded,queue,status,parseCSV,previewWords,article,readingCatalog,startReading,readingElapsed,submitReading,reasons,copy};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.LearningCore=api;
 })(globalThis);

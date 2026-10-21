@@ -2,7 +2,7 @@
 (() => {
 'use strict';
 const A=StudyApp,L=LearningCore,C=StudyCore,$=id=>document.getElementById(id),node=A.node,button=A.button;
-let importWords=null,importArticles=null,editId=null,editorSource='',deleteId=null,selectedWord=null,memoryKey='',lastReadingKey='',readingId='',previousFocus=null;
+let importArticles=null,editId=null,editorSource='',deleteId=null,selectedWord=null,memoryKey='',lastReadingKey='',readingId='',previousFocus=null;
 const state=()=>A.getState();
 const allWords=()=>L.catalog(WORDS,state().study,{includePending:true});
 const articles=()=>L.readingCatalog(READING_PACKS,state().study);
@@ -19,14 +19,17 @@ function openEditor(w=null){
 function closeEditor(){$('word-editor').hidden=true;document.body.classList.remove('editor-open');previousFocus?.focus();}
 function renderLibrary(){
  const s=state(),query=L.canonical($('library-search').value),personal=s.study.customWords;
- $('library-count').textContent=`个人 ${personal.length} · 收藏 ${s.study.favorites.length}`;
+ $('library-count').textContent=`个人 ${allWords().filter(w=>w.id.startsWith('user:')).length} · 收藏 ${s.study.favorites.length}`;
+ if($('library-panel').hidden)return;
  const selected=allWords().filter(w=>(w.id.startsWith('user:')||s.study.favorites.includes(w.id))&&(!query||`${w.word} ${w.meaning}`.toLowerCase().includes(query)));
  $('library-list').replaceChildren();
  if(!selected.length)$('library-list').append(node('p','还没有符合条件的个人词或收藏。','helper'));
- for(const w of selected){
+ if(selected.length>100)$('library-list').append(node('p',`共 ${selected.length} 词，先显示前 100 词；输入英文或释义可搜索全部词条。`,'helper'));
+ for(const w of selected.slice(0,100)){
   const row=node('div',undefined,'library-row'),info=node('div');info.append(node('strong',w.word),node('small',w.pending?'待完善释义 · 不进入学习队列':`${w.pos} ${w.meaning}`));
   const actions=node('div',undefined,'inline-actions');
-  if(w.id.startsWith('user:')){
+  if(w.materialId){actions.append(button('资料管理',()=>window.MaterialsUI?.openExisting(w.materialId)));}
+  else if(w.id.startsWith('user:')){
    actions.append(button('编辑',()=>openEditor(w)),button(deleteId===w.id?'确认删除':'删除',async()=>{
     if(deleteId!==w.id){deleteId=w.id;renderLibrary();return;}
     await A.transact(s=>{s.study.customWords=s.study.customWords.filter(x=>x.id!==w.id);s.study.favorites=s.study.favorites.filter(x=>x!==w.id);});deleteId=null;A.refreshWords();
@@ -73,22 +76,13 @@ $('custom-word-form').addEventListener('submit',async e=>{
 });
 $('show-library').addEventListener('click',()=>{$('library-panel').hidden=!$('library-panel').hidden;renderLibrary();});$('library-search').addEventListener('input',renderLibrary);
 $('favorite-word').addEventListener('click',()=>{const id=A.getCurrent()?.id;if(!id)return;A.transact(s=>{const a=s.study.favorites;s.study.favorites=a.includes(id)?a.filter(x=>x!==id):[...a,id];});});
-$('word-order').addEventListener('change',async()=>{const order=$('word-order').value;if(!['sequence','random','weak'].includes(order))return;const ok=await A.transact(s=>{s.study.order=order;});if(ok)A.refreshWords();});
+$('word-order').addEventListener('change',async()=>{const order=$('word-order').value;if(!['sequence','random','weak'].includes(order))return;const ok=await A.transact(s=>{s.study.order=order;});if(ok){A.refreshWords();A.notify('已保存下一轮的学习顺序，当前轮次保持不变。');}});
 $('word-accent').addEventListener('change',()=>{const accent=$('word-accent').value;A.transact(s=>{s.study.accent=accent;});});
+// 词卡页与资料中心共用一个预览、校验、去重和确认流程。
 $('word-file').addEventListener('change',async()=>{
- importWords=null;$('word-import-preview').hidden=true;const file=$('word-file').files[0];if(!file)return;
- try{
-  if(file.size>2*1024*1024)throw Error('单次词库文件请小于 2MB。');importWords=L.previewWords(await file.text(),file.name,allWords());
-  $('word-import-summary').textContent=`可新增 ${importWords.words.length} 词，跳过重复 ${importWords.duplicates.length} 词，格式错误 ${importWords.errors.length} 条。确认后只添加，不覆盖已有词。`;
-  $('word-import-errors').textContent=[...importWords.errors.slice(0,6),importWords.duplicates.length?`重复：${importWords.duplicates.slice(0,8).join('、')}`:'',`待导入：${importWords.words.slice(0,10).map(w=>w.word).join('、')}`].filter(Boolean).join('\n');
-  $('confirm-word-import').disabled=!importWords.words.length;$('word-import-preview').hidden=false;
- }catch(e){saveError(e);}finally{$('word-file').value='';}
-});
-$('cancel-word-import').addEventListener('click',()=>{importWords=null;$('word-import-preview').hidden=true;});
-$('confirm-word-import').addEventListener('click',async()=>{
- if(!importWords)return;const batch=importWords.words;let added=0;
- const ok=await A.transact(s=>{for(const w of batch)if(L.addWord(s,w,WORDS).added)added++;});
- if(ok){importWords=null;$('word-import-preview').hidden=true;A.refreshWords();A.notify(`已新增 ${added} 词；重复词保持原内容和进度。`);}
+ const file=$('word-file').files[0];if(!file)return;
+ try{if(!window.MaterialsUI)throw Error('资料中心尚未就绪，请刷新页面后重试。');await MaterialsUI.previewFile(file,'vocabulary');}
+ catch(e){saveError(e);}finally{$('word-file').value='';}
 });
 function tokenize(target,text,paragraph){
  const parts=text.split(/([A-Za-z]+(?:[-’'][A-Za-z]+)*)/g);
@@ -107,14 +101,14 @@ function selectReadingWord(token,p){
  selectedWord={word:L.canonical(token),paragraph:p};const existing=allWords().find(w=>L.canonical(w.word)===selectedWord.word);
  $('reading-word-tool').hidden=false;$('reading-word-label').textContent=selectedWord.word;
  $('reading-word-definition').textContent=existing?(existing.pending?'已加入，待补充释义':`${existing.pos} ${existing.meaning}`):'未在本地词库中；可先保存生词，再查词补充释义。';
- $('add-reading-word').disabled=!!existing;$('add-reading-word').textContent=existing?'已在词库':'加入生词本';$('edit-reading-word').hidden=!existing?.id.startsWith('user:');
+ $('add-reading-word').disabled=!!existing;$('add-reading-word').textContent=existing?'已在词库':'加入生词本';$('edit-reading-word').hidden=!existing?.id.startsWith('user:');$('edit-reading-word').textContent=existing?.materialId?'查看/管理资料':'补充 / 编辑释义';
 }
 $('add-reading-word').addEventListener('click',async()=>{
  if(!selectedWord)return;const selected={...selectedWord},a=findArticle();let added=false;
  const ok=await A.transact(s=>{added=L.addWord(s,{word:selected.word,meaning:'',example:selected.paragraph.text.slice(0,2000),source:`阅读：${a.title} / ${selected.paragraph.id}`},WORDS,{pending:true}).added;});
  if(ok){selectReadingWord(selected.word,selected.paragraph);A.notify(added?'已存入个人词库，补齐释义后进入背词队列。':'这个词已在词库中。');}
 });
-$('edit-reading-word').addEventListener('click',()=>{const w=allWords().find(w=>w.word===selectedWord?.word&&w.id.startsWith('user:'));if(w)openEditor(w);});
+$('edit-reading-word').addEventListener('click',()=>{const w=allWords().find(w=>w.word===selectedWord?.word&&w.id.startsWith('user:'));if(w?.materialId)window.MaterialsUI?.openExisting(w.materialId);else if(w)openEditor(w);});
 function renderReading(force=false){
  const s=state(),list=articles();
  if(!readingId)readingId=Object.keys(s.study.reading.drafts)[0]||list[0]?.id||'';
@@ -178,7 +172,7 @@ $('confirm-reading-import').addEventListener('click',async()=>{
  if(ok){readingId=batch[0]?.id||readingId;importArticles=null;$('reading-import-preview').hidden=true;renderReading(true);A.notify(`已添加 ${added} 篇材料，来源声明和逐题解析已保存。`);}
 });
 function render(){
- $('word-order').value=state().study.order;$('word-accent').value=state().study.accent;renderLibrary();renderMemory(A.getCurrent(),$('flashcard').getAttribute('aria-expanded')==='true');renderReading();
+ $('word-order').value=state().study.order;$('word-accent').value=state().study.accent;renderLibrary();renderMemory(A.getCurrent(),$('flashcard').getAttribute('aria-expanded')==='true');if(A.getPage()==='reading')renderReading();
 }
-window.LearningUI={render,renderMemory};render();setInterval(renderReadingTimer,1000);
+window.LearningUI={render,renderMemory,openReading:id=>{readingId=id;A.navigate('reading');renderReading(true);}};render();setInterval(renderReadingTimer,1000);
 })();

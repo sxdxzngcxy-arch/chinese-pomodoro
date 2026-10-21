@@ -1,0 +1,15 @@
+{
+ "schema":1,
+ "articles":[{
+  "id":"materials-original-library-pilot-1","type":"reading-careful","title":"Testing a Quiet Space","year":2026,
+  "source":{"kind":"original","label":"原创模拟练习 · 资料导入示例","rights":"本项目原创短文与题目，允许学习及随项目分发。不是官方六级真题。"},"audioUrl":"",
+  "paragraphs":[
+   {"id":"P1","text":"A university library opened a quiet room for a two-week trial. Visitors could choose to leave their phones in a locker, but using the locker was optional. At the end of each visit, readers were invited to rate how well they had concentrated. No examination results were collected."},
+   {"id":"P2","text":"Most readers who left their phones in a locker reported better concentration. However, the librarian noted that these readers had chosen the arrangement themselves. They might already have been more willing to avoid distractions. The library therefore decided to continue the trial and collect more evidence before making a wider recommendation."}
+  ],
+  "questions":[
+   {"id":"Q1","type":"single-choice","stem":"Which claim is supported by the passage?","options":[{"id":"A","text":"Leaving phones in lockers clearly improved examination scores."},{"id":"B","text":"Some readers reported better concentration, but the trial did not measure exam results."},{"id":"C","text":"All visitors were required to use a locker."},{"id":"D","text":"The library had already proved the arrangement effective for everyone."}],"answer":"B","explanation":{"summary":"证据仅为自报专注情况，没有收集考试成绩，不能将其扩大为提分结论。","paraphrase":"reported better concentration 对应自报专注改善；did not measure exam results 对应 No examination results were collected。","evidence":[{"paragraphId":"P1","quote":"No examination results were collected."},{"paragraphId":"P2","quote":"Most readers who left their phones in a locker reported better concentration."}],"distractors":{"A":"把自报专注偷换为考试分数，原文没有成绩数据。","C":"原文说 optional，而非 required。","D":"把试验性观察扩大为对所有人有效的证明。"}}},
+   {"id":"Q2","type":"single-choice","stem":"Why did the library seek more evidence?","options":[{"id":"A","text":"The readers were randomly assigned to groups."},{"id":"B","text":"Nobody had provided a rating."},{"id":"C","text":"Self-selection could explain part of the reported improvement."},{"id":"D","text":"The trial had shown that phones never distract readers."}],"answer":"C","explanation":{"summary":"主动选择寄存手机的人可能原本就更愿意避免干扰，存在自我选择因素。","paraphrase":"Self-selection = had chosen the arrangement themselves；could explain = might already have been more willing。","evidence":[{"paragraphId":"P2","quote":"They might already have been more willing to avoid distractions."}],"distractors":{"A":"这些读者自行选择，没有随机分组。","B":"与读者提供专注评价相矛盾。","D":"原文没有证明手机从不造成干扰。"}}}
+  ]
+ }]
+}

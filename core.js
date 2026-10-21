@@ -25,6 +25,7 @@ function normalize(raw, wordIds){
  for(const [k,p] of Object.entries(raw.progress)){
   if(!safeKey(k)||!obj(p)||!integer(p.stage,0,6)||!numeric(p.due)||!dateKey(p.firstDay)||!integer(p.attempts,1)||!integer(p.correct,0,p.attempts)||typeof p.wrong!=='boolean'||p.lastGrade!==undefined&&!['known','vague','unknown'].includes(p.lastGrade))throw Error('单词进度内容无效。');
   s.progress[k]={stage:p.stage,due:p.due,firstDay:p.firstDay,attempts:p.attempts,correct:p.correct,wrong:p.wrong,lastGrade:p.lastGrade|| (p.wrong?(p.stage===0?'unknown':'vague'):'known')};
+  if(p.lastReviewedAt!==undefined){if(!numeric(p.lastReviewedAt))throw Error('单词学习时间无效。');s.progress[k].lastReviewedAt=p.lastReviewedAt;}
  }
  if(!obj(raw.days))throw Error('学习记录无效。');
  for(const [k,v] of Object.entries(raw.days)){if(!dateKey(k)||!obj(v)||!integer(v.newWords)||!integer(v.reviews)||!integer(v.attempts)||!integer(v.correct,0,v.attempts))throw Error('每日学习记录无效。');s.days[k]={newWords:v.newWords,reviews:v.reviews,attempts:v.attempts,correct:v.correct};}
@@ -68,25 +69,80 @@ function queue(s,words,kind,now){
  const left=Math.max(0,s.settings.goal-(s.days[day(now)]?.newWords||0));
  return [...due,...words.filter(w=>!s.progress[w.id]).slice(0,left)];
 }
-function grade(s,id,grade,now){
+function vocabularyDay(s,now){
+ const k=day(now);return s.study.vocabulary.days[k]||=( {baselineReviews:s.days[k]?.reviews||0,reviewed:[],known:0,vague:0,unknown:0,practice:0,quizAttempts:0,quizCorrect:0} );
+}
+function reviewCount(s,now){const d=s.study.vocabulary.days[day(now)];return d?d.baselineReviews+d.reviewed.length:s.days[day(now)]?.reviews||0;}
+function schedule(prev,grade,now){
+ const stage=prev?.stage||0;
+ if(grade==='known'){const next=Math.min(6,stage+1);return {stage:next,due:addDay(now,[0,1,3,7,14,30,60][next]),wrong:false};}
+ return {stage:grade==='unknown'?0:Math.max(0,stage-1),due:now+(grade==='unknown'?10:30)*60000,wrong:true};
+}
+function grade(s,id,grade,now,{newLimit=s.settings.goal}={}){
  if(!['known','vague','unknown'].includes(grade))return false;
  const prev=s.progress[id];if(prev&&prev.due>now)return false;
- if(!prev&&(s.days[day(now)]?.newWords||0)>=s.settings.goal)return false;
- const d=daily(s,now), known=grade==='known';
+ if(!prev&&(s.days[day(now)]?.newWords||0)>=newLimit)return false;
+ const vd=vocabularyDay(s,now),d=daily(s,now), known=grade==='known';
  const p=prev||{stage:0,due:0,firstDay:day(now),attempts:0,correct:0,wrong:false};
  if(!prev)d.newWords++;else d.reviews++;
- p.lastGrade=grade;p.attempts++;d.attempts++;
- if(known){p.correct++;d.correct++;p.stage=Math.min(6,p.stage+1);p.due=addDay(now,[0,1,3,7,14,30,60][p.stage]);p.wrong=false;
+ if(prev&&!vd.reviewed.includes(id))vd.reviewed.push(id);vd[grade]++;
+ p.lastGrade=grade;p.attempts++;d.attempts++;p.lastReviewedAt=now;
+ Object.assign(p,schedule(prev,grade,now));
+ if(known){p.correct++;d.correct++;
   if(prev)reward(s,`review:${day(now)}:${id}`,now,{xp:2});
- }else{p.stage=grade==='unknown'?0:Math.max(0,p.stage-1);p.due=now+(grade==='unknown'?10:30)*60000;p.wrong=true;}
+ }
  s.progress[id]=p;
  if(d.newWords>=30)reward(s,`daily30:${day(now)}`,now,{coins:20,food:2});
  return true;
 }
+// 轮次只在用户开始时抽样一次；以后按稳定词 ID 推进，不重新洗牌。
+function startWords(s,words,kind,now){
+ const v=s.study.vocabulary;if(v.active&&v.active.index<v.active.items.length)return v.active;
+ if(!['learn','review','wrong'].includes(kind))return null;
+ const id=uid(),order=s.study.order,available=words.filter(w=>!w.pending),random=L.seeded(`${s.study.seed}:${id}`);
+ const sort=list=>order==='random'?L.shuffle(list,random):order==='weak'?[...list].sort((a,b)=>Number(s.progress[b.id]?.wrong||false)-Number(s.progress[a.id]?.wrong||false)||(s.progress[a.id]?.correct||0)/(s.progress[a.id]?.attempts||1)-(s.progress[b.id]?.correct||0)/(s.progress[b.id]?.attempts||1)):list;
+ const budget=Math.max(0,v.reviewGoal-reviewCount(s,now)),due=sort(available.filter(w=>s.progress[w.id]?.due<=now).sort((a,b)=>s.progress[a.id].due-s.progress[b.id].due));
+ let items=[];
+ if(kind==='wrong'){
+  let left=budget;
+  const wrong=available.filter(w=>s.progress[w.id]?.wrong),dueWrong=sort(wrong.filter(w=>s.progress[w.id].due<=now)),others=sort(wrong.filter(w=>s.progress[w.id].due>now));
+  const priority=dueWrong.slice(0,budget),rest=[...dueWrong.slice(budget),...others].sort((a,b)=>(v.practiceTimes[a.id]||0)-(v.practiceTimes[b.id]||0));
+  items=[...priority,...rest].slice(0,v.reviewGoal||30).map(w=>({id:w.id,mode:s.progress[w.id].due<=now&&left-->0?'review':'practice'}));
+ }else{
+  items=due.slice(0,budget).map(w=>({id:w.id,mode:'review'}));
+  if(kind==='learn'){
+   const left=Math.max(0,s.settings.goal-(s.days[day(now)]?.newWords||0));
+   items.push(...sort(available.filter(w=>!s.progress[w.id])).slice(0,left).map(w=>({id:w.id,mode:'new'})));
+  }
+  if(order==='random')items=L.shuffle(items,random);
+ }
+ if(!items.length)return null;
+ v.active={id,kind,order,day:day(now),startedAt:now,newGoal:s.settings.goal,index:0,revealed:false,items:items.map(i=>({...i,grade:null,skipped:false,nextDue:null}))};return v.active;
+}
+function finishWords(s,now){
+ const v=s.study.vocabulary,a=v.active;if(!a||a.index<a.items.length||v.history.some(h=>h.id===a.id))return;
+ const r={id:a.id,kind:a.kind,order:a.order,day:a.day,startedAt:a.startedAt,finishedAt:Math.max(now,a.startedAt),total:a.items.length,skipped:0,practice:0,known:0,vague:0,unknown:0};
+ for(const i of a.items){if(i.skipped)r.skipped++;else{r[i.grade]++;if(i.mode==='practice')r.practice++;}}
+ v.history=[r,...v.history].slice(0,100);
+}
+function skipWord(s,sessionId,index,now){
+ const a=s.study.vocabulary.active;if(!a||a.id!==sessionId||a.index!==index||index>=a.items.length)return false;
+ a.items[index].skipped=true;a.index++;a.revealed=false;finishWords(s,now);return true;
+}
+function gradeWord(s,words,sessionId,index,rating,now){
+ const a=s.study.vocabulary.active;if(!a||a.id!==sessionId||a.index!==index||!a.revealed||!['known','vague','unknown'].includes(rating))return false;
+ const item=a.items[index];if(!item)return false;
+ const w=words.find(w=>w.id===item.id&&!w.pending),p=s.progress[item.id];
+ if(!w||(item.mode==='new'&&p)||(item.mode==='review'&&(!p||p.due>now))||(item.mode==='practice'&&!p)){skipWord(s,sessionId,index,now);return {skipped:true};}
+ if(item.mode==='practice'){vocabularyDay(s,now).practice++;s.study.vocabulary.practiceTimes[item.id]=now;item.nextDue=p.due;}
+ else{if(!grade(s,item.id,rating,now,{newLimit:Math.max(s.settings.goal,a.newGoal)}))return false;item.nextDue=s.progress[item.id].due;}
+ item.grade=rating;a.index++;a.revealed=false;finishWords(s,now);
+ return {accepted:true,id:item.id,grade:rating,nextDue:item.nextDue,practice:item.mode==='practice',complete:a.index===a.items.length};
+}
 function quiz(s,id,direction,answer,correctAnswer,now){
  if(!['en-zh','zh-en'].includes(direction)||!s.progress[id])return {accepted:false};
  const key=`quiz:${day(now)}:${direction}:${id}`;if(Object.hasOwn(s.ledger,key))return {accepted:false};
- s.ledger[key]=now;const right=answer===correctAnswer,d=daily(s,now);d.attempts++;if(right)d.correct++;else {s.progress[id].wrong=true;s.progress[id].stage=0;s.progress[id].due=Math.min(s.progress[id].due,now+10*60000);}
+ s.ledger[key]=now;const right=answer===correctAnswer,d=daily(s,now),vd=vocabularyDay(s,now);vd.quizAttempts++;if(right)vd.quizCorrect++;d.attempts++;if(right)d.correct++;else {s.progress[id].wrong=true;s.progress[id].stage=0;s.progress[id].due=Math.min(s.progress[id].due,now+10*60000);}
  // 小测不改变间隔，也不发经验，避免跳过到期复习或反复练习刷奖。
  return {accepted:true,right};
 }
@@ -110,6 +166,6 @@ const shop={plant:{name:'窗边绿植',price:30},rug:{name:'柔软地毯',price:
 function buy(s,id){if(!Object.hasOwn(shop,id)||s.pet.owned.includes(id)||s.pet.coins<shop[id].price)return false;s.pet.coins-=shop[id].price;s.pet.owned.push(id);return true;}
 function streak(s,now){let n=0,d=new Date(now);const active=k=>(s.days[k]?.attempts||0)>0;if(!active(day(d)))d.setDate(d.getDate()-1);while(active(day(d))){n++;d.setDate(d.getDate()-1);}return n;}
 function achievements(s){return [{name:'初次专注',icon:'◷',earned:Object.values(s.counts).reduce((a,b)=>a+b,0)>=1},{name:'词汇萌芽',icon:'✿',earned:Object.keys(s.progress).length>=30},{name:'百词小树',icon:'♧',earned:Object.keys(s.progress).length>=100},{name:'温柔陪伴',icon:'♡',earned:s.pet.bond>=20},{name:'成长伙伴',icon:'☆',earned:s.pet.xp>=200}];}
-const api={KEY,LEGACY,day,addDay,uid,fresh,normalize,migrate,daily,reward,settle,remaining,queue,grade,quiz,interact,buy,shop,streak,achievements};
+const api={KEY,LEGACY,day,addDay,uid,fresh,normalize,migrate,daily,reward,settle,remaining,queue,grade,schedule,reviewCount,startWords,skipWord,gradeWord,quiz,interact,buy,shop,streak,achievements};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.StudyCore=api;
 })(globalThis);
