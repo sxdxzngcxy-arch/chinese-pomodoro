@@ -11,8 +11,8 @@ const labelSource=r=>`${r.kind==='vocabulary'?'词库':'仔细阅读'} · ${r.me
 function setPagination(prefix,total,page){const count=Math.max(1,Math.ceil(total/PAGE));$(`material-${prefix}-page`).textContent=`${page+1} / ${count}`;$(`material-${prefix}-prev`).disabled=page===0;$(`material-${prefix}-next`).disabled=page+1>=count;}
 function renderPreview(){
  assessments=M.assess(drafts,D.snapshot(),base());previewPage=Math.min(previewPage,Math.max(0,Math.ceil(drafts.length/PAGE)-1));
- const invalid=assessments.filter(a=>a.errors.length).length,duplicates=assessments.filter(a=>a.duplicate).length,chosen=assessments.filter(a=>a.draft.selected!==false),valid=chosen.filter(a=>a.record&&!a.duplicate);
- $('materials-summary').textContent=drafts.length?`共 ${drafts.length} 项，待修复 ${invalid}，重复 ${duplicates}，已选 ${chosen.length}。确认前请核对来源和内容。`:'尚未选择文件。这里只保存确认后的资料；不会猜测缺失答案或解析。';
+ const invalid=assessments.filter(a=>a.errors.length).length,duplicates=assessments.filter(a=>a.duplicate).length,chosen=assessments.filter(a=>a.draft.selected!==false),valid=chosen.filter(a=>a.record&&!a.duplicate),skipped=chosen.length-valid.length;
+ $('materials-summary').textContent=drafts.length?`共 ${drafts.length} 项，待修复 ${invalid}，重复 ${duplicates}，已选 ${chosen.length}；可导入 ${valid.length}，将跳过 ${skipped}。确认前请核对来源和内容。`:'尚未选择文件。这里只保存确认后的资料；不会猜测缺失答案或解析。';
  $('materials-file-name').textContent=filename||'尚未选择文件';$('materials-preview').replaceChildren();
  for(const item of pages(assessments,previewPage)){
   const {draft,record,index}=item,row=node('article',undefined,'material-preview-row'),title=record?.title||draft.payload?.word||draft.payload?.title||`第 ${index+1} 项`,label=node('label',undefined,'material-select'),check=node('input');check.type='checkbox';check.checked=draft.selected!==false;check.setAttribute('aria-label',`选择 ${title}`);check.addEventListener('change',()=>{draft.selected=check.checked;$('materials-reviewed').checked=false;renderPreview();});
@@ -20,8 +20,8 @@ function renderPreview(){
   if(record)info.append(node('small',labelSource(record)));if(item.errors.length||item.duplicate)info.append(node('p',item.errors.join('；')||item.duplicate));
   label.append(check,info);row.append(label,button('编辑核对',()=>openEditor(index)));$('materials-preview').append(row);
  }
- setPagination('preview',drafts.length,previewPage);$('confirm-materials').disabled=!ready||working||!$('materials-reviewed').checked||!valid.length||chosen.length!==valid.length;
- $('confirm-materials').textContent=working?'正在保存…':`确认导入选中资料${valid.length?'（'+valid.length+'项）':''}`;
+ setPagination('preview',drafts.length,previewPage);$('confirm-materials').disabled=!ready||working||!$('materials-reviewed').checked||!valid.length;
+ $('confirm-materials').textContent=working?'正在保存…':`确认导入可用资料${valid.length?'（'+valid.length+'项）':''}${skipped?' · 跳过'+skipped+'项':''}`;
 }
 function renderLibrary(){
  const all=D.snapshot(),query=$('materials-search').value.trim().toLowerCase(),kind=$('materials-filter').value,year=$('materials-year-filter').value;
@@ -113,9 +113,9 @@ for(const [prefix,setPage]of [['preview',v=>{previewPage=v;}],['library',v=>{lib
 async function withLock(work){return navigator.locks?.request?navigator.locks.request(StudyCore.KEY,work):work();}
 async function restoreBundle(bundle){const normalized=M.validateBundle(bundle);if(!normalized.materials.length&&!normalized.retiredReadings.length)return{added:0,skipped:[]};await D.open();return withLock(()=>D.addBatch(normalized.materials,base(),normalized.retiredReadings));}
 $('confirm-materials').addEventListener('click',async()=>{
- if(working||!ready||!$('materials-reviewed').checked)return;renderPreview();if($('confirm-materials').disabled)return;const selected=assessments.filter(a=>a.draft.selected!==false);if(selected.some(a=>!a.record||a.duplicate))return;
+ if(working||!ready||!$('materials-reviewed').checked)return;renderPreview();if($('confirm-materials').disabled)return;const selected=assessments.filter(a=>a.draft.selected!==false);const importable=selected.filter(a=>a.record&&!a.duplicate);if(!importable.length){status('没有可导入的资料，请先修复或取消重复项。');return;}
  working=true;renderPreview();
- try{const result=await withLock(()=>D.addBatch(selected.map(a=>a.record),base(),retiredInput));drafts=[];filename='';$('materials-reviewed').checked=false;status(`已导入 ${result.added} 项，跳过 ${result.skipped.length} 项。资料已接入背词或阅读；已有内容未覆盖。`);await storageInfo();}
+ try{const result=await withLock(()=>D.addBatch(importable.map(a=>a.record),base(),retiredInput));drafts=[];filename='';$('materials-reviewed').checked=false;status(`已导入 ${result.added} 项，跳过 ${selected.length-importable.length+result.skipped.length} 项（重复或无效资料不会覆盖旧数据）。资料已接入背词或阅读。`);await storageInfo();}
  catch(e){status(e.message);}finally{working=false;renderPreview();renderLibrary();}
 });
 for(const id of ['materials-search','materials-filter','materials-year-filter'])$(id).addEventListener(id==='materials-search'?'input':'change',()=>{libraryPage=0;renderLibrary();});
