@@ -24,11 +24,11 @@ async function addBatch(input,base,retiredInput=[]){
  const result=await new Promise((resolve,reject)=>{
   const tx=db.transaction(['materials','retired'],'readwrite'),store=tx.objectStore('materials'),retired=tx.objectStore('retired'),req=store.getAll(),rreq=retired.getAll();let current=null,tombs=null,summary={added:0,skipped:[]},failure=null;
   const run=()=>{if(current===null||tombs===null)return;try{
-   const known=[...current],add=[];
+   const known=[...current],add=[],index=M.duplicateIndex(current,base);
    for(const [i,r]of records.entries()){
-    let reason=M.duplicate(r,known,base);
+    let reason=index.check(r);
     if(!reason&&r.kind==='reading'){const tomb=tombs.find(t=>t.articleId===r.payload.id);if(tomb&&tomb.digest!==hashes[i])reason='该阅读ID曾用于不同文章，请改用新ID以保护旧答题记录。';}
-    if(reason){summary.skipped.push({title:r.title,reason});continue;}known.push(r);add.push({record:r,digest:hashes[i]});
+    if(reason){summary.skipped.push({title:r.title,reason});continue;}known.push(r);index.add(r);add.push({record:r,digest:hashes[i]});
    }
    const bytes=new TextEncoder().encode(JSON.stringify(known)).byteLength;
    if(known.length>M.MAX_RECORDS||bytes>M.MAX_STORED)throw Error('本阶段资料库上限为5000条 / 6MB文本。请导出并整理后重试；没有覆盖或部分写入。');

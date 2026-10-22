@@ -43,7 +43,7 @@ function queue(s,words,kind,now,baseQueue,day){
  return combined;
 }
 function status(p){if(!p)return '未学';if(p.wrong)return p.lastGrade==='vague'?'模糊':'不认识';return p.stage>=3?'已掌握':'认识';}
-function parseCSV(input,{mapHeaders=h=>h}={}){
+function parseCSV(input,{mapHeaders=h=>h,tolerantRows=false}={}){
  const rows=[];let row=[],field='',quoted=false,afterQuote=false;
  const push=()=>{row.push(field);field='';afterQuote=false;};
  input=input.replace(/^\uFEFF/,'');
@@ -57,7 +57,7 @@ function parseCSV(input,{mapHeaders=h=>h}={}){
  if(quoted)throw Error('CSV 存在未闭合引号。');push();if(row.some(x=>x.trim()))rows.push(row);
  if(rows.length<2)throw Error('CSV 需要表头和至少一条数据。');
  const headers=rows.shift().map(h=>mapHeaders(h.trim()));if(!headers.includes('word')||!headers.includes('meaning')||new Set(headers).size!==headers.length||headers.some(h=>!safe(h)))throw Error('CSV 表头需要唯一的 word 和 meaning 字段。');
- return rows.map((r,i)=>{if(r.length!==headers.length)throw Error(`CSV 第 ${i+2} 行的列数不一致。`);return Object.fromEntries(headers.map((h,j)=>[h,r[j]]));});
+ return rows.map((r,i)=>{if(r.length!==headers.length){if(tolerantRows)return{word:'',meaning:'',__parseError:`CSV 第 ${i+2} 条记录的列数不一致（期望${headers.length}列，实际${r.length}列）。`};throw Error(`CSV 第 ${i+2} 行的列数不一致。`);}return Object.fromEntries(headers.map((h,j)=>[h,r[j]]));});
 }
 function previewWords(input,filename,existing){
  const raw=/\.csv$/i.test(filename)?parseCSV(input):JSON.parse(input.replace(/^\uFEFF/,''));

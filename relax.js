@@ -1,0 +1,11 @@
+/* 无第三方音源：白噪音只在主动点击后由 Web Audio 在本机合成。 */
+(() => {
+'use strict';
+const A=StudyApp,C=StudyCore,$=id=>document.getElementById(id),change=V2UI.change;
+let context,source,gain,noiseToken=0;
+function stop(){noiseToken++;if(source){try{source.stop();}catch{}source.disconnect();source=null;}if(context){context.close().catch(()=>{});context=null;}$('noise-toggle').textContent='播放轻柔白噪音';$('noise-toggle').setAttribute('aria-pressed','false');$('noise-status').textContent='已静音。';}
+$('noise-toggle').addEventListener('click',async()=>{if(context){stop();return;}const token=++noiseToken;try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)throw Error('当前浏览器不支持本地合成音频。');context=new Audio();await context.resume();if(token!==noiseToken||!context)return;const buffer=context.createBuffer(1,context.sampleRate*3,context.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;source=context.createBufferSource();source.buffer=buffer;source.loop=true;gain=context.createGain();gain.gain.value=Number($('noise-volume').value);const filter=context.createBiquadFilter();filter.type='lowpass';filter.frequency.value=1200;source.connect(filter);filter.connect(gain);gain.connect(context.destination);source.start();$('noise-toggle').textContent='停止白噪音';$('noise-toggle').setAttribute('aria-pressed','true');$('noise-status').textContent='正在播放本机合成噪音，可随时停止。';}catch(e){stop();A.notify(e.message);}});
+$('noise-volume').addEventListener('input',()=>{if(gain&&context)gain.gain.setTargetAtTime(Number($('noise-volume').value),context.currentTime,.03);});
+$('two-minute-start').addEventListener('click',async()=>{const t=A.getState().timer;if((t.endAt!==null||t.remaining<t.total)&&!confirm('将当前计时改为一次2分钟专注？已完成记录与设置保持不变。'))return;const ok=await change(s=>{s.timer={mode:'focus',remaining:120,total:120,endAt:Date.now()+120000,id:C.uid()};s.garden.mode='light';s.platform.plan.mode='light';});if(ok){stop();A.navigate('focus');A.notify('2分钟已经开始。不必做很多，先完成一个小动作。');}});
+window.addEventListener('study:before-navigate',e=>{if(e.detail.previous==='garden'&&e.detail.next!=='garden')stop();});document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});window.addEventListener('pagehide',stop);
+})();

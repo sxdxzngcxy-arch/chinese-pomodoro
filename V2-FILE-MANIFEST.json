@@ -1,0 +1,229 @@
+{
+  "version": "2.0",
+  "baseCommit": "6c16f5d7eded97790304809f2a3482acec0aab19",
+  "deployment": "not published",
+  "files": [
+    {
+      "path": "CHANGELOG.md",
+      "bytes": 3895,
+      "sha256": "ecbab432718ddc3c5ebfdb7dc30499ebcf45f8c4009a97d6cea2aa4645299ca0",
+      "change": "modified"
+    },
+    {
+      "path": "IMPORT-FORMATS.md",
+      "bytes": 6334,
+      "sha256": "848fbe2bd7dfaf1be8272c1b0797de062a9f5c749396bb61a803ba2445935957",
+      "change": "added"
+    },
+    {
+      "path": "IPHONE-ACCEPTANCE.md",
+      "bytes": 2741,
+      "sha256": "b8032dcf46f15663a60949f9d19669808641e2b5045e905c601dc9aaf7f7ca20",
+      "change": "added"
+    },
+    {
+      "path": "README.md",
+      "bytes": 9313,
+      "sha256": "bfd640ba58133d4e8541976aeb388dbe57edca20047943e98aa4f1bddaae86ac",
+      "change": "modified"
+    },
+    {
+      "path": "TEST-REPORT-V2.md",
+      "bytes": 3942,
+      "sha256": "56742d3f2c7d13f49d0a2e2a4ec9eee923d948ea0a51e53ed2638e0ef6530a0e",
+      "change": "added"
+    },
+    {
+      "path": "V2.0-DELIVERY.md",
+      "bytes": 4668,
+      "sha256": "b50a62e3e886b53c31bce2f35a6d0b834c61af94f6f57fc9bfd6d3b1529e106d",
+      "change": "added"
+    },
+    {
+      "path": "app.js",
+      "bytes": 34396,
+      "sha256": "f0d61d934bce13dacf5c68244ebbeea5154febca96e65fbb4d970f20405224a0",
+      "change": "modified"
+    },
+    {
+      "path": "backup.js",
+      "bytes": 9995,
+      "sha256": "1723141419cc6c838219dca2a61385fc4f68feb4ba73b0224333d0cbc9194eef",
+      "change": "added"
+    },
+    {
+      "path": "core.js",
+      "bytes": 15508,
+      "sha256": "3048e575d35a30e7311394510a84a4b57945f35046773c99bff46e7f1b72081d",
+      "change": "modified"
+    },
+    {
+      "path": "dashboard.js",
+      "bytes": 10945,
+      "sha256": "b8dd19c7356bcf4113d4b9e46b90b1091528019e69d4c1f84494e9e91b764bda",
+      "change": "added"
+    },
+    {
+      "path": "garden-core.js",
+      "bytes": 6845,
+      "sha256": "945bbf48d143cd7a73325bbc5e6b00e834b7c8f97e6da2b76a2c747288949239",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "garden.js",
+      "bytes": 12053,
+      "sha256": "76f4d27a0fac9cf932888d805486a99e858177e643feb1657f4dcddf8a241dee",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "index.html",
+      "bytes": 51903,
+      "sha256": "e45b6f07ebd392aaa3b68fea20dd642f31deab2f10e2c916b24e9e931d0ebaa9",
+      "change": "modified"
+    },
+    {
+      "path": "learning-core.js",
+      "bytes": 17589,
+      "sha256": "22641ec8dff0567c2c54c32070cb44d89b1b27a6246fc5f023135e0fa94e43e6",
+      "change": "modified"
+    },
+    {
+      "path": "learning.js",
+      "bytes": 20127,
+      "sha256": "2ac0140bd7efb0bd66fe2e20ef1cd424b022fa19d1901bbf181ae8a7bb2b5bdf",
+      "change": "modified"
+    },
+    {
+      "path": "listening-template.json",
+      "bytes": 1254,
+      "sha256": "a65666cba4b3eee2960fe60c8999dcedc1f9a52bd3f5d6306f5de6c14b434a68",
+      "change": "added"
+    },
+    {
+      "path": "listening.js",
+      "bytes": 17069,
+      "sha256": "a0c8f4c95f4b7810a15d825bca240009047065cf32f3018f796bcc3ea37e4c8b",
+      "change": "added"
+    },
+    {
+      "path": "materials-core.js",
+      "bytes": 9722,
+      "sha256": "548ccfc0a52193b68c891f76fd9965fff558470715c8ce25d6ebee1fad3db964",
+      "change": "modified"
+    },
+    {
+      "path": "materials-reading-template.json",
+      "bytes": 3113,
+      "sha256": "242d99cc1063fcb72828baf3bdd38733d23421324d23206b6697b0d0301d7050",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "materials-store.js",
+      "bytes": 5395,
+      "sha256": "bcdd72e86ec0d4483db1eaa0453833cd9163d06414c38e20fbf5b75aee27f2a6",
+      "change": "modified"
+    },
+    {
+      "path": "materials-word-template.csv",
+      "bytes": 374,
+      "sha256": "82488fd346189672aa49da86646051ae5f0de674f417a5d03f334080debb7eda",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "materials-word-template.json",
+      "bytes": 453,
+      "sha256": "038091360e5dd24e33202a15cd0496a7dd43283118519be26e8c793a4c61fe45",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "materials.js",
+      "bytes": 19735,
+      "sha256": "c4e73c17697096ae081b6afe6e58deab561ab52aa5614ff41c111852dda41337",
+      "change": "modified"
+    },
+    {
+      "path": "media-store.js",
+      "bytes": 5023,
+      "sha256": "124f7148614d89c52fed0a06a4efafe32dd92b06c168361d203334d4f8af3451",
+      "change": "added"
+    },
+    {
+      "path": "memory-data.js",
+      "bytes": 3207,
+      "sha256": "8c39af12aa3180ec0b0f2d740d0b88148e86395639a55d1a423fd64493465fe7",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "pets.js",
+      "bytes": 4831,
+      "sha256": "eca362fb21535f817623a21c1e7c54a00746b3ade015b1f097a273eee9a9993e",
+      "change": "modified"
+    },
+    {
+      "path": "platform-core.js",
+      "bytes": 10099,
+      "sha256": "cb036194ee5f1a036cf40a5b50d59794e8eb818fa735dcfb4410e3d78d305dcc",
+      "change": "added"
+    },
+    {
+      "path": "reading-data.js",
+      "bytes": 7653,
+      "sha256": "b2735d850f1529487ba7a164dab78b2f1ca4536b4ab10bc5a53d6d600f476ff3",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "reading-template.json",
+      "bytes": 10676,
+      "sha256": "39ce20244fb5eeb7fea0a185f6d080f33530280b49cc53598e177a6a7254f1f0",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "relax.js",
+      "bytes": 2498,
+      "sha256": "698749808b13a50ce968e5e1fc355f62967a26dcc01c5a6fa9c4a228a75a3ace",
+      "change": "added"
+    },
+    {
+      "path": "styles.css",
+      "bytes": 52742,
+      "sha256": "61cbb51f2651255f0b15995861349c15c13dbaadfcaad48ecedea03f64e890eb",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "training-data.js",
+      "bytes": 3502,
+      "sha256": "3b5d4b0862f96057b5b36bf376a169075535727763688181c799b04f88015159",
+      "change": "added"
+    },
+    {
+      "path": "v2.css",
+      "bytes": 5466,
+      "sha256": "9d6db3516bb9d90c3ea0e7c3099e6855b47534fab18bf80a48fb0c44126d9df1",
+      "change": "added"
+    },
+    {
+      "path": "word-template.csv",
+      "bytes": 307,
+      "sha256": "a1d57bc6ae828a24386c827378716ba96d2f4ae4d37fd9aeeee49cee9986da54",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "words.js",
+      "bytes": 16779,
+      "sha256": "22d40d8c80ffa618845a2087d6dd47c4362940330ce90b43cf1c3db4bc910474",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "writing-template.json",
+      "bytes": 3147,
+      "sha256": "c59383c421f2f6189837514efc9562e763b9af6f83c8fe103a9a96639733bef9",
+      "change": "added"
+    },
+    {
+      "path": "writing.js",
+      "bytes": 12078,
+      "sha256": "c82640ec42d52674eb61334680cc692a4831719719d744e8ce949167d7a6832b",
+      "change": "added"
+    }
+  ]
+}

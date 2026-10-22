@@ -6,7 +6,7 @@ const learningQueue=(s,kind,now)=>L.queue(s,L.catalog(WORDS,s.study),kind,now,C.
 let state, busy=false, storageBlocked=false, storageUnavailable=false, filter='learn', current=null, revealed=false, quizQuestion=null, importCandidate=null, importMaterials=null, page='focus', lastDay=C.day(), quizDirection='en-zh';
 const clone=x=>JSON.parse(JSON.stringify(x));
 let noticeTimer;
-function notify(text){$('notice').textContent=text;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>{$('notice').textContent='';},10000);}
+function notify(text){const name=window.PET_CATALOG?.[state?.pet?.species]?.name||'小满';text=String(text).replaceAll('小满',name);$('notice').textContent=text;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>{$('notice').textContent='';},10000);}
 function read(){
  if(storageUnavailable)return clone(state||C.fresh());
  try{
@@ -23,6 +23,7 @@ function read(){
 function write(next){
  if(storageUnavailable){state=next;return;}
  const previous=localStorage.getItem(C.KEY);
+ if(previous&&!storageBlocked&&!JSON.parse(previous).platform&&!localStorage.getItem(`${C.KEY}-before-v2.0`))localStorage.setItem(`${C.KEY}-before-v2.0`,previous);
  if(previous&&!storageBlocked&&!JSON.parse(previous).study?.vocabulary&&!localStorage.getItem(`${C.KEY}-before-v1.2`))localStorage.setItem(`${C.KEY}-before-v1.2`,previous);
  localStorage.setItem(C.KEY,JSON.stringify(next));state=next;
 }
@@ -40,7 +41,7 @@ async function transact(action,{restore=false,settleTimer=true}={}){
    if(finished==='focus')celebrate();else if(finished==='break')notify('休息结束。准备好了，再开启下一段专注吧。');
    renderAll();
    if(!restore&&Object.keys(next.ledger).filter(k=>k.startsWith('daily30:')).length>previousDaily){celebrate('words');notify('今天学过 30 个新词！小满为你庆祝，+20 金币、+2 食物。');}
-   if(!restore&&1+Math.floor(next.pet.xp/100)>previousLevel){celebrate('level');animatePet('leveling',2600);$('pet-message').textContent=`小满升级到 Lv.${1+Math.floor(next.pet.xp/100)} 啦！谢谢你的一点点陪伴。`;notify($('pet-message').textContent);}
+   if(!restore&&1+Math.floor(next.pet.xp/100)>previousLevel){celebrate('level');animatePet('leveling',2600);$('pet-message').textContent=`${PET_CATALOG[next.pet.species]?.name||'伙伴'}升级到 Lv.${1+Math.floor(next.pet.xp/100)} 啦！谢谢你的一点点陪伴。`;notify($('pet-message').textContent);}
    return result===undefined?true:result;
   };
   return navigator.locks?.request ? await navigator.locks.request(C.KEY,work) : work();
@@ -52,18 +53,19 @@ function button(text,fn,className='soft'){const b=node('button',text,className);
 function duration(mode){return state.settings[mode]*60;}
 function applyTheme(){
  const selected=state.settings.theme;
+ document.body.dataset.font=state.platform.plan.font;
  document.body.dataset.theme=selected==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):selected;
  document.body.classList.toggle('reduce-motion',state.settings.reduced||matchMedia('(prefers-reduced-motion: reduce)').matches);
  document.querySelector('meta[name="theme-color"]').content=document.body.dataset.theme==='dark'?'#1c2521':'#f5f4ee';
  $('theme').value=selected;$('reduced-motion').checked=state.settings.reduced;
 }
 function navigate(next){
- if(!['focus','words','reading','pet','stats','garden','materials'].includes(next))next='focus';const previous=page;page=next;if(previous==='words'&&next!=='words')stopWordSpeech();window.GardenUI?.onNavigate(previous,next);
+ if(!PlatformCore.routes.includes(next))next='home';const previous=page;window.dispatchEvent(new CustomEvent('study:before-navigate',{detail:{previous,next}}));page=next;if(previous==='words'&&next!=='words')stopWordSpeech();window.GardenUI?.onNavigate(previous,next);
  document.querySelectorAll('.view').forEach(el=>{el.hidden=el.id!==`page-${page}`;});
- document.querySelectorAll('.bottom-nav button').forEach(el=>{if(el.dataset.go===page)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});
+ document.querySelectorAll('.bottom-nav button').forEach(el=>{if(el.dataset.go===page||(el.dataset.go==='training'&&['focus','reading','listening','writing','materials'].includes(page)))el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});
  if(location.hash!==`#${page}`)history.replaceState(null,'',`#${page}`);
  document.querySelectorAll('.garden-entry').forEach(el=>{if(page==='garden')el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});
- $('celebration').hidden=true;renderAll();window.scrollTo({top:0,behavior:'instant'});
+ $('celebration').hidden=true;renderAll();window.PlatformUI?.onNavigate(previous,next);window.dispatchEvent(new CustomEvent('study:navigate',{detail:{previous,next}}));window.scrollTo({top:0,behavior:'instant'});
 }
 function renderTimer(){
  const t=state.timer, seconds=Math.ceil(C.remaining(state,Date.now()));
@@ -74,7 +76,7 @@ function renderTimer(){
  $('clock-label').textContent=t.mode==='focus'?'保持专注':'放松一下';
  $('clock-caption').textContent=t.mode==='focus'?'给自己一段不被打扰的时间':'伸个懒腰，让思绪透透气';
  $('start').textContent=t.endAt!==null?'暂停计时  Ⅱ':t.remaining<t.total?'继续计时  ▶':t.mode==='focus'?'开始专注  ▶':'开始休息  ▶';
- $('companion-text').textContent=t.mode==='break'?'休息时间，去小屋摸摸小满吧。':'完成专注，为小狗积攒成长能量。';
+ $('companion-text').textContent=t.mode==='break'?'休息时间，去小屋摸摸学习伙伴吧。':'完成专注，为学习伙伴积攒成长能量。';
  document.title=`${t.endAt!==null?formatted+' · ':''}六级喵 · 学习与心境伙伴`;
 
 }
@@ -172,7 +174,7 @@ function renderQuiz(newQuestion=false){
 function renderPet(){
  const p=state.pet,level=1+Math.floor(p.xp/100),definition=Object.hasOwn(PET_CATALOG,p.species)?PET_CATALOG[p.species]:PET_CATALOG.teddy;
  if($('pet-avatar').dataset.species!==definition.id){$('pet-avatar').innerHTML=definition.svg;$('pet-avatar').dataset.species=definition.id;}
- $('pet-avatar').setAttribute('aria-label',`摸摸${definition.type}${definition.name}的头`);$('pet-name').textContent=definition.name;
+ $('pet-avatar').setAttribute('aria-label',`摸摸${definition.type}${definition.name}的头`);$('pet-name').textContent=definition.name;$('pet-avatar').title=`摸摸${definition.name}的头`;$('companion-name').textContent=`${definition.name}，陪你慢慢来`;
  $('pet-picker-label').hidden=Object.keys(PET_CATALOG).length<2;$('pet-picker').replaceChildren();
  for(const item of Object.values(PET_CATALOG)){const option=node('option',item.type);option.value=item.id;$('pet-picker').append(option);}$('pet-picker').value=definition.id;$('pet-level').textContent=`Lv.${level}`;$('pet-wallet').textContent=`◈ ${p.coins} 金币 · ♧ ${p.food} 食物`;
  $('pet-xp').textContent=`总经验 ${p.xp} · 距下一级 ${100-p.xp%100}`;$('xp-progress').value=p.xp%100;
@@ -195,7 +197,7 @@ function renderStats(){
  $('all-stats').textContent=`当前词库已学 ${words.filter(w=>state.progress[w.id]).length} / ${words.length} 词 · 累计专注 ${Object.values(state.counts).reduce((a,b)=>a+b,0)} 次 / ${Object.values(state.focusMinutes).reduce((a,b)=>a+b,0)} 分钟。断签不会扣除记录或宠物状态。`;
  $('storage-state').textContent=storageBlocked?'原始数据异常，写入已暂停。导出会保留原始文本。':storageUnavailable?'内存模式：离开前务必导出。':navigator.locks?'本地自动保存已启用；多标签操作通过浏览器锁串行结算。':'本地自动保存已启用。此浏览器不支持跨标签锁，请只打开一个页面，避免同时修改。';
 }
-function renderAll(){words=L.catalog(WORDS,state.study);if(!$('time-form').contains(document.activeElement)){$('focus-length').value=state.settings.focus;$('break-length').value=state.settings.break;}applyTheme();renderTimer();renderFocusStats();renderTasks();renderWords();renderPet();renderStats();window.LearningUI?.render();window.GardenUI?.render();window.MaterialsUI?.render();}
+function renderAll(){words=L.catalog(WORDS,state.study);if(!$('time-form').contains(document.activeElement)){$('focus-length').value=state.settings.focus;$('break-length').value=state.settings.break;}applyTheme();renderTimer();renderFocusStats();renderTasks();renderWords();renderPet();renderStats();window.LearningUI?.render();window.GardenUI?.render();window.MaterialsUI?.render();window.PlatformUI?.render();window.ListeningUI?.render();window.WritingUI?.render();}
 const animationTimers={};
 function animatePet(kind,ms=1900){
  const room=$('room');room.classList.remove(kind);void room.offsetWidth;room.classList.add(kind);clearTimeout(animationTimers[kind]);animationTimers[kind]=setTimeout(()=>room.classList.remove(kind),ms);
@@ -203,15 +205,15 @@ function animatePet(kind,ms=1900){
 function celebrate(type='focus'){
  const definition=Object.hasOwn(PET_CATALOG,state.pet.species)?PET_CATALOG[state.pet.species]:PET_CATALOG.teddy;
  $('celebration-art').innerHTML=definition.svg;
- $('celebration-title').textContent=type==='level'?`小满升级到 Lv.${1+Math.floor(state.pet.xp/100)} 啦！`:'小满为你庆祝！';
+ $('celebration-title').textContent=type==='level'?`${definition.name}升级到 Lv.${1+Math.floor(state.pet.xp/100)} 啦！`:`${definition.name}为你庆祝！`;
  $('celebration-detail').textContent=type==='words'?'今日 30 新词 · +20 金币 · +2 食物':type==='level'?'一点点努力，一起长大 · 成长记录已保存':'完成专注 · +25 经验 · +10 金币';
  $('celebration').hidden=false;animatePet('celebrating');
- $('pet-message').textContent='又完成了一段专注！小满开心地跳了起来。';
+ $('pet-message').textContent=`又完成了一段学习！${definition.name}开心地跳了起来。`;
 }
 async function petAction(action){
  let message='',wasSleeping=state.pet.sleeping;
  const ok=await transact(s=>{message=C.interact(s,action,Date.now());});
- if(ok){$('pet-message').textContent=message;
+ if(ok){$('pet-message').textContent=message.replaceAll('小满',PET_CATALOG[state.pet.species]?.name||'小满');
   if(!state.pet.sleeping){if(action==='pat')animatePet('petting');if(action==='play')animatePet('playing');if(action==='feed')animatePet('petting');if(action==='sleep'&&wasSleeping)animatePet('waking');}
  }
 }
@@ -280,44 +282,18 @@ $('pet-picker').addEventListener('change',()=>{const id=$('pet-picker').value;if
 $('theme').addEventListener('change',()=>{const theme=$('theme').value;transact(s=>{s.settings.theme=theme;});});$('reduced-motion').addEventListener('change',()=>{const reduced=$('reduced-motion').checked;transact(s=>{s.settings.reduced=reduced;});});
 for(const query of ['(prefers-color-scheme: dark)','(prefers-reduced-motion: reduce)'])matchMedia(query).addEventListener('change',applyTheme);
 function download(text,name){const a=node('a');const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
-$('export-data').addEventListener('click',async()=>{
- try{
-  const snapshot=clone(state),now=Date.now();
-  if(snapshot.timer.endAt!==null){snapshot.timer.remaining=Math.max(1,C.remaining(snapshot,now));snapshot.timer.endAt=null;}
-  for(const d of Object.values(snapshot.study.reading.drafts)){d.elapsed=L.readingElapsed(d,now);d.runningSince=null;}
-  G.pause(snapshot.garden,now);
-  let materialsWarning='';if(!storageBlocked&&window.MaterialsDB){try{snapshot.materialsBackup=await MaterialsDB.exportBundle();}catch(e){snapshot.materialsUnavailable=true;materialsWarning='资料库暂不可访问，本次仅导出学习记录，未包含资料。请稍后另行备份资料。';}}
-  const data=storageBlocked?(localStorage.getItem(C.KEY)||localStorage.getItem(C.LEGACY)):JSON.stringify({...snapshot,exportedAt:new Date(now).toISOString()},null,2);
-  download(data||'{}',`yike-backup-${C.day()}.json`);notify(materialsWarning||'已生成完整备份，包含资料库。备份中的计时已暂停，当前页面仍可继续。iPhone 可保存到“文件”App。');
- }catch(e){notify(`导出失败：${e.message}`);}
-});
-$('import-file').addEventListener('change',async()=>{
- importCandidate=null;importMaterials=null;$('import-preview').hidden=true;$('restore-garden').checked=false;$('restore-garden-label').hidden=true;const file=$('import-file').files[0];if(!file)return;
- try{if(file.size>20*1024*1024)throw Error('备份超过20MB限制。');const raw=JSON.parse(await file.text());importCandidate=C.normalize(raw,wordIds);if(raw.materialsBackup!==undefined){if(!window.MaterialsUI)throw Error('资料中心尚未就绪，请稍后重试。');importMaterials=await MaterialsUI.validateBackup(raw.materialsBackup);}$('restore-garden-label').hidden=raw.garden===undefined;$('import-summary').textContent=`即将替换：${importCandidate.tasks.length} 个任务、${Object.keys(importCandidate.progress).length} 个单词进度、${Object.values(importCandidate.counts).reduce((a,b)=>a+b,0)} 次专注、${importCandidate.pet.coins} 金币、${importCandidate.study.customWords.length} 个个人词、${Object.keys(importCandidate.study.reading.last).length} 篇阅读记录。学习部分会替换并保留本机恢复副本。心境默认保留；可选合并备份中的 ${importCandidate.garden.entries.length} 条心境，同日期保留本机记录。导入会暂停备份计时。资料中心将追加 ${importMaterials?.materials.length||0} 项，重复项跳过，现有资料不会清除。`;$('import-preview').hidden=false;}catch(e){importCandidate=null;importMaterials=null;notify(`未导入：${e.message}`);}finally{$('import-file').value='';}
-});
-$('cancel-import').addEventListener('click',()=>{importCandidate=null;importMaterials=null;$('import-preview').hidden=true;});
-$('confirm-import').addEventListener('click',async()=>{
- if(!importCandidate||busy)return;const replacement=clone(importCandidate),mergeGarden=$('restore-garden').checked;
- if(replacement.timer.endAt!==null){replacement.timer.remaining=Math.max(1,C.remaining(replacement,Date.now()));replacement.timer.endAt=null;}
- for(const d of Object.values(replacement.study.reading.drafts)){d.elapsed=L.readingElapsed(d,Date.now());d.runningSince=null;}
- const ok=await transact(s=>{
-  if(!storageUnavailable){const prior=localStorage.getItem(C.KEY);if(prior!==null)localStorage.setItem(`${C.KEY}-before-import`,prior);}
-  const currentGarden=s.garden;Object.assign(s,replacement);s.garden=mergeGarden?G.merge(currentGarden,replacement.garden):currentGarden;
- },{restore:true});
- if(ok){storageBlocked=false;const materials=importMaterials;importCandidate=null;importMaterials=null;current=null;quizQuestion=null;revealed=false;$('import-preview').hidden=true;renderAll();
-  if(materials){try{const result=await MaterialsUI.restoreBundle(materials);notify(`学习备份已恢复，资料新增${result.added}项、跳过${result.skipped.length}项；导入前学习数据保留在本机恢复副本。`);}catch(e){notify(`学习记录已恢复并保留恢复副本，但资料追加失败：${e.message} 请保管原备份，在资料中心重试其中的资料备份。`);}}else notify('备份已恢复；导入前的已保存数据也保留在本地恢复副本中。');}
-});
+// 整站备份及跨IndexedDB恢复由 backup.js 统一处理。
 $('dismiss-celebration').addEventListener('click',()=>{$('celebration').hidden=true;});
 window.addEventListener('storage',e=>{if(e.key===C.KEY&&!busy){state=read();current=null;quizQuestion=null;renderAll();}});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){state=read();tick();renderAll();}});window.addEventListener('pageshow',()=>tick());
 function scrubGardenCopies(day=null){
  if(storageUnavailable)return;
- const keys=[`${C.KEY}-before-import`,`${C.KEY}-before-v1.1`,`${C.KEY}-before-v1.2`];
+ const keys=[`${C.KEY}-before-import`,`${C.KEY}-before-v1.1`,`${C.KEY}-before-v1.2`,`${C.KEY}-before-v2.0`];
  for(const key of keys){const raw=localStorage.getItem(key);if(!raw)continue;const copy=JSON.parse(raw);if(!copy.garden)continue;if(!Array.isArray(copy.garden.entries))throw Error('本地恢复副本中的心境格式异常，未完成清除。');copy.garden.entries=day?copy.garden.entries.filter(e=>e.day!==day):[];localStorage.setItem(key,JSON.stringify(copy));}
 }
-window.StudyApp={getState:()=>state,getFreshState:()=>read(),refreshMaterials:()=>renderAll(),getPage:()=>page,isBusy:()=>busy,scrubGardenCopies,transact,notify,node,button,navigate,getCurrent:()=>current,refreshWords:()=>{words=L.catalog(WORDS,state.study);renderWords();},download};
+window.StudyApp={isStorageBlocked:()=>storageBlocked,isMemoryOnly:()=>storageUnavailable,finishRestore:()=>{storageBlocked=false;current=null;quizQuestion=null;revealed=false;renderAll();},celebrate,animatePet,getState:()=>state,getFreshState:()=>read(),refreshMaterials:()=>renderAll(),getPage:()=>page,isBusy:()=>busy,scrubGardenCopies,transact,notify,node,button,navigate,getCurrent:()=>current,refreshWords:()=>{words=L.catalog(WORDS,state.study);renderWords();},download};
 state=read();
 if(!storageBlocked&&!storageUnavailable){try{const previous=localStorage.getItem(C.KEY);if(!previous||!JSON.parse(previous).study){if(previous&&!localStorage.getItem(`${C.KEY}-before-v1.1`))localStorage.setItem(`${C.KEY}-before-v1.1`,previous);write(state);}}catch(e){notify('升级数据暂未保存，请检查存储空间并导出备份。');}}
-navigate(location.hash.slice(1)||'focus');tick();setInterval(tick,1000);
+navigate(location.hash.slice(1)||'home');tick();setInterval(tick,1000);
 if(!navigator.locks)notify('此浏览器不支持跨标签锁，建议只打开一个学习页面以保持记录一致。');
 })();

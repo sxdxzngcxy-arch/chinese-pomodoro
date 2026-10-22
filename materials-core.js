@@ -34,7 +34,7 @@ function duplicate(record,existing,base){
 }
 function fromRaw(payload,kind,rootMeta,filename){
  const provided=obj(payload?.source)?payload.source:obj(rootMeta?.source)?rootMeta.source:{};
- return{id:uid(),kind,payload:obj(payload)?copy(payload):payload,meta:{source:{kind:provided.kind||payload?.source_kind||'user-provided',label:provided.label||(typeof payload?.source==='string'?payload.source:'')||filename,rights:provided.rights||payload?.rights||rootMeta?.rights||''},year:payload?.year??rootMeta?.year??null},selected:true};
+ return{id:uid(),kind,payload:obj(payload)?copy(payload):payload,parseError:payload?.__parseError||'',meta:{source:{kind:provided.kind||payload?.source_kind||'user-provided',label:provided.label||(typeof payload?.source==='string'?payload.source:'')||filename,rights:provided.rights||payload?.rights||rootMeta?.rights||''},year:payload?.year??rootMeta?.year??null},selected:true};
 }
 function convertVocabularyEntry(row){
  if(!obj(row))return row;
@@ -53,13 +53,13 @@ function parse(input,filename,kind){
  if(!['csv','json','jsonl'].includes(ext))throw Error('词库支持 CSV、JSON、JSONL；阅读及备份只支持 JSON。');
  if(ext==='jsonl'&&kind!=='vocabulary')throw Error('JSONL 仅用于单词词库，请选择词库类型。');
  let rows,rootMeta={};
- if(ext==='csv'){if(kind!=='vocabulary')throw Error('阅读仅支持 JSON。');rows=L.parseCSV(input,{mapHeaders:h=>aliases[h]||h});}
+ if(ext==='csv'){if(kind!=='vocabulary')throw Error('阅读仅支持 JSON。');rows=L.parseCSV(input,{mapHeaders:h=>aliases[h]||h,tolerantRows:true});}
  else if(ext==='jsonl'){
   const lines=input.replace(/^\uFEFF/,'').split(/\r?\n/);rows=[];
   for(let i=0;i<lines.length;i++){
    if(!lines[i].trim())continue;
    try{const item=JSON.parse(lines[i]);if(!obj(item))throw Error('需要单词对象');rows.push(item);}
-   catch(e){throw Error(`JSONL 第 ${i+1} 行解析失败：${e.message}`);}
+   catch(e){rows.push({word:'',meaning:'',__parseError:`JSONL 第 ${i+1} 行解析失败：${e.message}`});}
    if(rows.length>MAX_RECORDS)throw Error('单次最多导入5000条。');
   }
  }else{
@@ -74,10 +74,18 @@ function parse(input,filename,kind){
  if(!Array.isArray(rows)||!rows.length||rows.length>MAX_RECORDS)throw Error('需要非空数组，或词库 words / 阅读 articles 数组，最多5000条。');
  return rows.map(r=>fromRaw(kind==='vocabulary'?convertVocabularyEntry(r):r,kind,rootMeta,filename));
 }
+// 预览和落库共用集合索引；几千条词库不再逐项扫描此前的所有词。
+function duplicateIndex(existing,base){
+ const ids=new Set(existing.map(r=>r.id)),words=new Set(base.words),articleIds=new Set(base.articles.map(a=>a.id)),articleKeys=new Set(base.articles.map(a=>a.key));
+ function add(r){ids.add(r.id);if(r.kind==='vocabulary')words.add(L.canonical(r.payload.word));else{articleIds.add(r.payload.id);articleKeys.add(contentKey(r));}}
+ existing.forEach(add);
+ function check(r){if(ids.has(r.id))return '资料ID已存在，不会覆盖原资料。';if(r.kind==='vocabulary')return words.has(L.canonical(r.payload.word))?'英文词条已存在（忽略大小写与多余空格）。':null;if(articleIds.has(r.payload.id))return '阅读文章ID已存在；不同文章请改用新的ID。';return articleKeys.has(contentKey(r))?'阅读正文与题目内容重复。':null;}
+ return{add,check};
+}
 function assess(drafts,existing,base){
- const accepted=[...existing];return drafts.map((d,index)=>{
-  try{const record=normalize(d),dupe=duplicate(record,accepted,base);if(!dupe&&d.selected!==false)accepted.push(record);return{index,draft:d,record,errors:[],duplicate:dupe};}
-  catch(e){return{index,draft:d,record:null,errors:[e.message],duplicate:null};}
+ const index=duplicateIndex(existing,base);return drafts.map((d,i)=>{
+  try{const record=normalize(d),dupe=index.check(record);if(!dupe&&d.selected!==false)index.add(record);return{index:i,draft:d,record,errors:[],duplicate:dupe};}
+  catch(e){return{index:i,draft:d,record:null,errors:[d.parseError?`${d.parseError}；${e.message}`:e.message],duplicate:null};}
  });
 }
 function bundle(records,retired=[]){return{format:'cet6-materials',version:1,exportedAt:new Date().toISOString(),materials:records.map(r=>normalize(r,r.updatedAt)),retiredReadings:retired.map(x=>({articleId:x.articleId,digest:x.digest})),assets:[]};}
@@ -87,6 +95,6 @@ function validateBundle(raw){
  if(!Array.isArray(retired)||retired.length>10000||retired.some(t=>!obj(t)||!safeId(t.articleId)||!text(t.digest,64)||!/^[a-f0-9]{64}$/.test(t.digest)))throw Error('已删除阅读的防冲突信息无效。');
  return bundle(records,retired);
 }
-const api={MAX_FILE,MAX_STORED,MAX_RECORDS,copy,uid,source,year,normalize,contentKey,baseline,duplicate,parse,assess,bundle,validateBundle};
+const api={MAX_FILE,MAX_STORED,MAX_RECORDS,copy,uid,source,year,normalize,contentKey,baseline,duplicate,duplicateIndex,parse,assess,bundle,validateBundle};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MaterialsCore=api;
 })(globalThis);

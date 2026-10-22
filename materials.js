@@ -115,7 +115,7 @@ async function restoreBundle(bundle){const normalized=M.validateBundle(bundle);i
 $('confirm-materials').addEventListener('click',async()=>{
  if(working||!ready||!$('materials-reviewed').checked)return;renderPreview();if($('confirm-materials').disabled)return;const selected=assessments.filter(a=>a.draft.selected!==false);const importable=selected.filter(a=>a.record&&!a.duplicate);if(!importable.length){status('没有可导入的资料，请先修复或取消重复项。');return;}
  working=true;renderPreview();
- try{const result=await withLock(()=>D.addBatch(importable.map(a=>a.record),base(),retiredInput));drafts=[];filename='';$('materials-reviewed').checked=false;status(`已导入 ${result.added} 项，跳过 ${selected.length-importable.length+result.skipped.length} 项（重复或无效资料不会覆盖旧数据）。资料已接入背词或阅读。`);await storageInfo();}
+ try{const result=await withLock(()=>D.addBatch(importable.map(a=>a.record),base(),retiredInput));const totalSkipped=drafts.length-importable.length+result.skipped.length;const reasons=assessments.filter(a=>!importable.includes(a)).slice(0,8).map(a=>`第${a.index+1}项：${a.errors.join('；')||a.duplicate||'未勾选'}`);const accepted=new Set(importable.map(a=>a.draft));drafts=drafts.filter(d=>!accepted.has(d));if(!drafts.length)filename='';$('materials-reviewed').checked=false;status(`已导入 ${result.added} 项，跳过 ${totalSkipped} 项。${reasons.join('；')}。待修复项目保留在预览中，重复资料不覆盖。资料已接入背词或阅读。`);await storageInfo();}
  catch(e){status(e.message);}finally{working=false;renderPreview();renderLibrary();}
 });
 for(const id of ['materials-search','materials-filter','materials-year-filter'])$(id).addEventListener(id==='materials-search'?'input':'change',()=>{libraryPage=0;renderLibrary();});

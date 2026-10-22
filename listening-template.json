@@ -1,0 +1,41 @@
+{
+  "format": "liujimiao-lessons",
+  "version": 1,
+  "lessons": [
+    {
+      "id": "demo-listening-library",
+      "type": "listening",
+      "title": "模拟练习 · A quiet place to study（自配音频）",
+      "source": {
+        "kind": "original",
+        "label": "六级喵原创模拟练习",
+        "rights": "本项目自行编写，可随网站用于个人学习；非官方真题。"
+      },
+      "year": null,
+      "audioId": null,
+      "segments": [
+        {
+          "id": "s1",
+          "start": 0,
+          "end": 6,
+          "text": "The university library has opened a quiet room for students.",
+          "translation": "大学图书馆为学生开放了一间安静的房间。"
+        },
+        {
+          "id": "s2",
+          "start": 6,
+          "end": 12,
+          "text": "Students can book a seat online before they arrive.",
+          "translation": "学生可以在到达之前在线预约座位。"
+        },
+        {
+          "id": "s3",
+          "start": 12,
+          "end": 19,
+          "text": "The aim is to help everyone study without unnecessary interruptions.",
+          "translation": "目的是帮助每个人在没有不必要打扰的情况下学习。"
+        }
+      ]
+    }
+  ]
+}

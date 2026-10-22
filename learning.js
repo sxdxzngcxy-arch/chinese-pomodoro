@@ -159,7 +159,7 @@ $('start-reading').addEventListener('click',()=>{const a=findArticle();A.transac
 function startAgain(wrongOnly=false){const a=findArticle();if(state().study.reading.drafts[a.id]){A.notify('当前练习尚未提交，先完成本轮，避免覆盖已保存的答案。');return;}A.transact(s=>L.startReading(s,a,Date.now(),wrongOnly));}
 $('retry-reading').addEventListener('click',()=>startAgain(true));$('new-reading-attempt').addEventListener('click',()=>startAgain());
 $('pause-reading').addEventListener('click',()=>{const a=findArticle();A.transact(s=>{const d=s.study.reading.drafts[a.id];if(!d)return;if(d.runningSince===null)d.runningSince=Date.now();else{d.elapsed=L.readingElapsed(d,Date.now());d.runningSince=null;}});});
-$('submit-reading').addEventListener('click',async()=>{const a=findArticle(),d=state().study.reading.drafts[a.id];if(!d)return;const result=await A.transact(s=>L.submitReading(s,a,d.id,Date.now()));if(result)A.notify(`已保存：${result.correct} / ${result.total}。先核对依据句，再给错题标记原因。`);});
+$('submit-reading').addEventListener('click',async()=>{const a=findArticle(),d=state().study.reading.drafts[a.id];if(!d)return;const result=await A.transact(s=>{const now=Date.now(),r=L.submitReading(s,a,d.id,now);if(r){const day=PlatformCore.dayState(s,StudyCore.day(now));if(!day.readingIds.includes(a.id))day.readingIds.push(a.id);StudyCore.reward(s,`reading-reward:${StudyCore.day(now)}:${a.id}`,now,{xp:10,coins:5});}return r;});if(result)A.notify(`已保存：${result.correct} / ${result.total}。先核对依据句，再给错题标记原因。`);});
 $('reading-file').addEventListener('change',async()=>{
  importArticles=null;$('reading-import-preview').hidden=true;const file=$('reading-file').files[0];if(!file)return;
  try{if(file.size>2*1024*1024)throw Error('单次阅读题库文件请小于 2MB。');const raw=JSON.parse((await file.text()).replace(/^\uFEFF/,'')),batch=Array.isArray(raw)?raw:raw.articles;if(!Array.isArray(batch)||!batch.length||batch.length>100)throw Error('题库需要 articles 数组，最多 100 篇。');const known=new Set(articles().map(a=>a.id));importArticles=[];let duplicate=0;for(const entry of batch){const a=L.article(entry);if(known.has(a.id))duplicate++;else{known.add(a.id);importArticles.push(a);}}$('reading-import-summary').textContent=`可添加 ${importArticles.length} 篇，跳过重复 id ${duplicate} 篇。不会覆盖已有文章、作答或解析。`;$('confirm-reading-import').disabled=!importArticles.length;$('reading-import-preview').hidden=false;
@@ -174,5 +174,5 @@ $('confirm-reading-import').addEventListener('click',async()=>{
 function render(){
  $('word-order').value=state().study.order;$('word-accent').value=state().study.accent;renderLibrary();renderMemory(A.getCurrent(),$('flashcard').getAttribute('aria-expanded')==='true');if(A.getPage()==='reading')renderReading();
 }
-window.LearningUI={render,renderMemory,openReading:id=>{readingId=id;A.navigate('reading');renderReading(true);}};render();setInterval(renderReadingTimer,1000);
+window.LearningUI={getReadingId:()=>readingId,render,renderMemory,openReading:id=>{readingId=id;A.navigate('reading');renderReading(true);}};render();setInterval(renderReadingTimer,1000);
 })();

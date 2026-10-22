@@ -3,11 +3,12 @@
 'use strict';
 const L=typeof module!=='undefined'&&module.exports?require('./learning-core.js'):root.LearningCore;
 const G=typeof module!=='undefined'&&module.exports?require('./garden-core.js'):root.GardenCore;
+const P=typeof module!=='undefined'&&module.exports?require('./platform-core.js'):root.PlatformCore;
 const DAY=86400000, KEY='yike-study-v2', LEGACY='yike-pomodoro-v1';
 const day=(ms=Date.now())=>{const d=new Date(ms);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
 const addDay=(ms,n)=>{const d=new Date(ms);d.setDate(d.getDate()+n);return d.getTime();};
 const uid=()=>globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;
-const fresh=()=>({version:2,garden:G.fresh(),study:L.fresh(),settings:{goal:30,focus:25,break:5,theme:'system',reduced:false},tasks:[],counts:{},focusMinutes:{},days:{},progress:{},pet:{species:'teddy',xp:0,coins:0,food:3,mood:80,hunger:80,bond:0,sleeping:false,owned:[],cooldowns:{}},ledger:{},timer:{mode:'focus',remaining:1500,endAt:null,id:null,total:1500},revision:0});
+const fresh=()=>({version:2,platform:P.fresh(),garden:G.fresh(),study:L.fresh(),settings:{goal:30,focus:25,break:5,theme:'system',reduced:false},tasks:[],counts:{},focusMinutes:{},days:{},progress:{},pet:{species:'cat',xp:0,coins:0,food:3,mood:80,hunger:80,bond:0,sleeping:false,owned:[],cooldowns:{}},ledger:{},timer:{mode:'focus',remaining:1500,endAt:null,id:null,total:1500},revision:0});
 const obj=x=>x!==null && typeof x==='object' && !Array.isArray(x);
 const safeKey=k=> !['__proto__','constructor','prototype'].includes(k);
 const numeric=(v,min=0,max=1e15)=>Number.isFinite(v)&&v>=min&&v<=max;
@@ -36,7 +37,7 @@ function normalize(raw, wordIds){
  if(!obj(raw.ledger)||Object.keys(raw.ledger).length>200000)throw Error('结算记录无效。');
  for(const [k,v]of Object.entries(raw.ledger)){if(!safeKey(k)||k.length>240||!numeric(v))throw Error('结算记录无效。');s.ledger[k]=v;}
  const t=raw.timer;if(!obj(t)||!['focus','break'].includes(t.mode)||!numeric(t.total,60,10800)||!numeric(t.remaining,0,t.total)||(t.endAt!==null&&!numeric(t.endAt,1,1e15))||(t.id!==null&&(typeof t.id!=='string'||!safeKey(t.id)||t.id.length>100))||(t.endAt!==null&&!t.id))throw Error('计时状态无效。');
- s.timer={mode:t.mode,total:t.total,remaining:t.remaining,endAt:t.endAt,id:t.id};s.revision=integer(raw.revision)?raw.revision:0;s.study=L.normalize(raw.study);s.garden=G.normalize(raw.garden);
+ s.timer={mode:t.mode,total:t.total,remaining:t.remaining,endAt:t.endAt,id:t.id};s.revision=integer(raw.revision)?raw.revision:0;s.study=L.normalize(raw.study);s.garden=G.normalize(raw.garden);s.platform=P.normalize(raw.platform);
  return s;
 }
 function migrate(old){
