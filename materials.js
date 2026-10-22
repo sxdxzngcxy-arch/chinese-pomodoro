@@ -97,7 +97,7 @@ async function previewFile(file,kind=null){
  try{
   if(!ready)throw Error('资料库未连接，请先重新连接；原学习功能不受影响。');
   if(file.size>M.MAX_FILE)throw Error('本阶段文件最多10MB，请拆分文本资料；音频不会写入localStorage。');
-  if(!/\.(csv|json)$/i.test(file.name))throw Error('阶段1只支持CSV/JSON，尚不读取Excel、PDF、Word或音频。');
+  if(!/\.(csv|json|jsonl|jsonl\.txt|jsonl\(\d+\)\.txt)$/i.test(file.name))throw Error('词库支持 CSV/JSON/JSONL，尚不读取Excel、PDF、Word或音频。');
   const text=await file.text(),next=M.parse(text,file.name,$('materials-kind').value);filename=file.name;drafts=next;retiredInput=[];
   if(/\.json$/i.test(file.name)){const raw=JSON.parse(text.replace(/^\uFEFF/,''));if(raw?.format==='cet6-materials')retiredInput=M.validateBundle(raw).retiredReadings;}
   previewPage=0;$('materials-reviewed').checked=false;const checked=M.assess(drafts,D.snapshot(),base());checked.forEach(a=>{if(a.duplicate)a.draft.selected=false;});renderPreview();status('已生成本地预览，没有写入。请补齐缺失信息，并核对答案和来源。');

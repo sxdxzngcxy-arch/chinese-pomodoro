@@ -36,21 +36,43 @@ function fromRaw(payload,kind,rootMeta,filename){
  const provided=obj(payload?.source)?payload.source:obj(rootMeta?.source)?rootMeta.source:{};
  return{id:uid(),kind,payload:obj(payload)?copy(payload):payload,meta:{source:{kind:provided.kind||payload?.source_kind||'user-provided',label:provided.label||(typeof payload?.source==='string'?payload.source:'')||filename,rights:provided.rights||payload?.rights||rootMeta?.rights||''},year:payload?.year??rootMeta?.year??null},selected:true};
 }
+function convertVocabularyEntry(row){
+ if(!obj(row))return row;
+ // KyleBing 风格的 JSONL 字段转为现有词库字段；保留原有标准字段。
+ if(typeof row.meaning==='string'&&row.meaning.trim())return row;
+ const translations=Array.isArray(row.translations)?row.translations:[];
+ const phrases=Array.isArray(row.phrases)?row.phrases:[];
+ const sentences=Array.isArray(row.sentences)?row.sentences:[];
+ const first=sentences.find(x=>obj(x)&&typeof x.sentence==='string')||{};
+ const meaning=translations.filter(x=>obj(x)&&typeof x.translation==='string').map(x=>x.translation).join('；');
+ const pos=[...new Set(translations.map(x=>x?.type).filter(x=>typeof x==='string'&&x.trim()))].join(' / ');
+ return {...row,meaning,pos,ipa:row.uk||row.us||'',example:first.sentence||'',translation:first.translation||'',collocations:phrases.filter(x=>obj(x)).map(x=>[x.phrase,x.translation].filter(Boolean).join(' — ')).join('；')};
+}
 function parse(input,filename,kind){
- const ext=filename.split('.').pop().toLowerCase();if(!['csv','json'].includes(ext))throw Error('阶段1仅支持 CSV/JSON；Excel、TXT、DOCX、PDF和音频将在后续实现。');
+ const lower=filename.toLowerCase(),ext=lower.endsWith('.jsonl.txt')||/\.jsonl\(\d+\)\.txt$/.test(lower)?'jsonl':lower.split('.').pop();
+ if(!['csv','json','jsonl'].includes(ext))throw Error('词库支持 CSV、JSON、JSONL；阅读及备份只支持 JSON。');
+ if(ext==='jsonl'&&kind!=='vocabulary')throw Error('JSONL 仅用于单词词库，请选择词库类型。');
  let rows,rootMeta={};
- if(ext==='csv'){if(kind!=='vocabulary')throw Error('阅读本阶段仅支持 JSON。');rows=L.parseCSV(input,{mapHeaders:h=>aliases[h]||h});}
- else{
-  const raw=JSON.parse(input.replace(/^\uFEFF/,''));
+ if(ext==='csv'){if(kind!=='vocabulary')throw Error('阅读仅支持 JSON。');rows=L.parseCSV(input,{mapHeaders:h=>aliases[h]||h});}
+ else if(ext==='jsonl'){
+  const lines=input.replace(/^\uFEFF/,'').split(/\r?\n/);rows=[];
+  for(let i=0;i<lines.length;i++){
+   if(!lines[i].trim())continue;
+   try{const item=JSON.parse(lines[i]);if(!obj(item))throw Error('需要单词对象');rows.push(item);}
+   catch(e){throw Error(`JSONL 第 ${i+1} 行解析失败：${e.message}`);}
+   if(rows.length>MAX_RECORDS)throw Error('单次最多导入5000条。');
+  }
+ }else{
+  let raw;try{raw=JSON.parse(input.replace(/^\uFEFF/,''));}catch(e){throw Error(`JSON 解析失败：${e.message}`);}
   if(obj(raw)&&raw.format==='cet6-materials'){
-   if(raw.version!==1||!Array.isArray(raw.materials)||raw.materials.length>MAX_RECORDS||(raw.assets!==undefined&&(!Array.isArray(raw.assets)||raw.assets.length)))throw Error('资料备份版本、数量或音频资源不受本阶段支持。');
+   if(raw.version!==1||!Array.isArray(raw.materials)||raw.materials.length>MAX_RECORDS||(raw.assets!==undefined&&(!Array.isArray(raw.assets)||raw.assets.length)))throw Error('资料备份版本、数量或音频资源不受支持。');
    return raw.materials.map(r=>({...copy(r),selected:true}));
   }
   if(kind==='backup')throw Error('请选择本中心导出的 cet6-materials JSON 备份。');
   if(obj(raw)){rootMeta=raw;rows=kind==='vocabulary'?raw.words:raw.articles;if(kind==='reading'&&raw.type==='reading-careful')rows=[raw];}else rows=raw;
  }
  if(!Array.isArray(rows)||!rows.length||rows.length>MAX_RECORDS)throw Error('需要非空数组，或词库 words / 阅读 articles 数组，最多5000条。');
- return rows.map(r=>fromRaw(r,kind,rootMeta,filename));
+ return rows.map(r=>fromRaw(kind==='vocabulary'?convertVocabularyEntry(r):r,kind,rootMeta,filename));
 }
 function assess(drafts,existing,base){
  const accepted=[...existing];return drafts.map((d,index)=>{
