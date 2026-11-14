@@ -1,0 +1,24 @@
+/* V4.5：新题型（选词填空 / 长篇匹配）与写作反馈面板样式。只用全站既有变量，不改旧页面。 */
+.v45-card{margin-top:24px}
+.v45-bank{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}
+.v45-chip{background:var(--light);border:1px solid var(--line);color:var(--green);border-radius:999px;padding:5px 11px;font-size:12px}
+.v45-passage{font-family:Georgia,serif;font-size:15px;line-height:2.1}
+.v45-article{font-family:Georgia,serif;font-size:14.5px;line-height:1.85}
+.v45-para{margin:0 0 14px}
+.v45-ptag{color:var(--green);font-family:inherit}
+select.v45-blank{font:inherit;font-size:13px;background:var(--input);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;max-width:100%}
+select.v45-right{border-color:#8da879;background:var(--light)}
+select.v45-wrong{border-color:#bc928a}
+.v45-stmts{display:grid;gap:10px;margin-top:16px}
+.v45-stmt{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;border-top:1px solid var(--line);padding-top:10px}
+.v45-stmt-text{font-size:13.5px;line-height:1.6;flex:1}
+.v45-stmt select{flex:none}
+.v45-review{margin-top:14px}
+.v45-row{border-top:1px solid var(--line);padding:10px 0}
+.v45-row strong{font-size:13px;color:var(--green);font-weight:550}
+.v45-checks{margin-top:10px}
+.v45-check{font-size:12.5px;line-height:1.7;margin:6px 0}
+.v45-check.ok{color:var(--green)}
+.v45-check.warn{color:#a06a2c}
+body[data-theme="dark"] .v45-check.warn{color:#e0b26a}
+@media(max-width:760px){.v45-stmt{flex-direction:column}.v45-stmt select{align-self:flex-end}}

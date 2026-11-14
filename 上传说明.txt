@@ -1,0 +1,15 @@
+六级喵 V4.5 + 蜡笔小新主题 更新包（共 15 个文件）
+
+上传方法（GitHub 网页）：
+1. 打开仓库 https://github.com/sxdxzngcxy-arch/chinese-pomodoro
+2. 点 Add file → Upload files
+3. 把本包 15 个文件全部拖进去（index.html、core.js、pets.js 是覆盖旧文件，属正常）
+4. Commit message 填：V4.5 content + Shin-chan theme + translation patterns
+5. 选 Commit directly to the main branch，提交
+6. 等 1-2 分钟，打开 https://sxdxzngcxy-arch.github.io/chinese-pomodoro/ 强制刷新（手机上关掉页面重开）
+
+更新内容：
+- 阅读页下方新增：选词填空、长篇匹配两个真题题型；仔细阅读共 9 篇 33 题
+- 写作页新增：写作反馈面板（本地机械检查 + AI 批改包）、翻译句型库（30 个句型）
+- 全站背景：蜡笔小新 A 边框款（设置里可关）；宠物小屋背景换 B 粉色拼贴款
+- 伙伴新增「小新和小白」：在宠物页点「更换伙伴」选择（旧存档不会自动换）

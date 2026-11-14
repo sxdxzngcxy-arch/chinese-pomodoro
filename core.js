@@ -8,7 +8,7 @@ const DAY=86400000, KEY='yike-study-v2', LEGACY='yike-pomodoro-v1';
 const day=(ms=Date.now())=>{const d=new Date(ms);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
 const addDay=(ms,n)=>{const d=new Date(ms);d.setDate(d.getDate()+n);return d.getTime();};
 const uid=()=>globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;
-const fresh=()=>({version:2,platform:P.fresh(),garden:G.fresh(),study:L.fresh(),settings:{goal:30,focus:25,break:5,theme:'system',reduced:false},tasks:[],counts:{},focusMinutes:{},days:{},progress:{},pet:{species:'teddy',xp:0,coins:0,food:3,mood:80,hunger:80,bond:0,sleeping:false,owned:[],cooldowns:{}},ledger:{},timer:{mode:'focus',remaining:1500,endAt:null,id:null,total:1500},revision:0});
+const fresh=()=>({version:2,platform:P.fresh(),garden:G.fresh(),study:L.fresh(),settings:{goal:30,focus:25,break:5,theme:'system',reduced:false},tasks:[],counts:{},focusMinutes:{},days:{},progress:{},pet:{species:'shinchan',xp:0,coins:0,food:3,mood:80,hunger:80,bond:0,sleeping:false,owned:[],cooldowns:{}},ledger:{},timer:{mode:'focus',remaining:1500,endAt:null,id:null,total:1500},revision:0});
 const obj=x=>x!==null && typeof x==='object' && !Array.isArray(x);
 const safeKey=k=> !['__proto__','constructor','prototype'].includes(k);
 const numeric=(v,min=0,max=1e15)=>Number.isFinite(v)&&v>=min&&v<=max;

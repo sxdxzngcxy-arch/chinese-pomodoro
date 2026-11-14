@@ -17,11 +17,12 @@
   <script src="platform-core.js?v=4.4" defer></script>
   <script src="training-data.js?v=2.0" defer></script>
   <script src="media-store.js?v=2.0" defer></script>
-  <script src="core.js?v=4.4" defer></script>
+  <script src="core.js?v=4.5t" defer></script>
   <script src="memory-data.js?v=2.0" defer></script>
   <script src="reading-data.js?v=2.0" defer></script>
   <script src="v44-content.js?v=4.4" defer></script>
-  <script src="pets.js?v=4.4" defer></script>
+  <script src="v45-content.js?v=4.5" defer></script>
+  <script src="pets.js?v=4.5t" defer></script>
   <script src="materials-core.js?v=4.4" defer></script>
   <script src="materials-store.js?v=2.1" defer></script>
   <script src="app.js?v=4.4" defer></script>
@@ -39,6 +40,13 @@
   <script src="backup.js?v=4.4" defer></script>
   <script src="v44-tools.js?v=4.4" defer></script>
   <link rel="stylesheet" href="v44.css?v=4.4">
+  <link rel="stylesheet" href="v45.css?v=4.5">
+  <script src="v45-types.js?v=4.5" defer></script>
+  <script src="v45-writing.js?v=4.5" defer></script>
+  <link rel="stylesheet" href="theme-shinchan.css?v=1">
+  <script src="theme-shinchan.js?v=1" defer></script>
+  <link rel="stylesheet" href="translation-patterns.css?v=1">
+  <script src="translation-patterns.js?v=1" defer></script>
 </head>
 <body>
   <div class="page">
@@ -121,7 +129,7 @@
       </section>
       <section id="page-reading" class="view reading-view" hidden aria-label="阅读训练">
         <div class="intro"><span class="eyebrow">EVIDENCE BEFORE ANSWERS · V4.4</span><h1>读懂，也选对。</h1><p>先定位依据，再辨别范围、推断与同义替换。</p></div>
-        <div class="reading-layout"><aside class="reading-sidebar"><section class="card"><h2>仔细阅读训练</h2><p class="helper">内置 7 篇原创模拟阅读，共23道单选题。所有结果只显示练习正确率，不换算官方六级分数。</p><label class="select-label" for="reading-select">选择材料</label><select id="reading-select"></select><p id="reading-source" class="helper"></p><div class="inline-actions"><button id="start-reading" class="soft">开始 / 继续</button><button id="retry-reading" class="soft">重练错题</button></div><p id="reading-timer" class="reading-timer" role="timer">00:00</p><button id="pause-reading" class="soft" hidden>暂停阅读计时</button><p id="reading-summary" class="helper"></p></section>
+        <div class="reading-layout"><aside class="reading-sidebar"><section class="card"><h2>仔细阅读训练</h2><p class="helper">内置 9 篇原创模拟阅读，共33道单选题；本页下方另有选词填空与长篇匹配两种真题题型（V4.5 新增）。所有结果只显示练习正确率，不换算官方六级分数。</p><label class="select-label" for="reading-select">选择材料</label><select id="reading-select"></select><p id="reading-source" class="helper"></p><div class="inline-actions"><button id="start-reading" class="soft">开始 / 继续</button><button id="retry-reading" class="soft">重练错题</button></div><p id="reading-timer" class="reading-timer" role="timer">00:00</p><button id="pause-reading" class="soft" hidden>暂停阅读计时</button><p id="reading-summary" class="helper"></p></section>
           <section class="card"><h2>导入自己的文章和题目</h2><button class="soft" data-go="materials">打开资料导入中心</button><p class="helper">使用你提供或获准使用的材料。本版支持仔细阅读单选题，逐题校验答案、依据句和干扰项解释。音频地址仅预留保存。</p><label class="import-label">选择题库 JSON<input id="reading-file" type="file" accept=".json,application/json"></label><a class="template-link" href="reading-template.json" download>下载题库 JSON 示例</a><div id="reading-import-preview" hidden><p id="reading-import-summary"></p><button id="confirm-reading-import" class="soft">确认添加题库</button><button id="cancel-reading-import" class="soft">取消</button></div></section>
           <section class="card"><h2>错题中心与文章收藏</h2><button id="favorite-reading" class="soft">收藏当前文章</button><label>按错因筛选<select id="reading-wrong-filter"><option value="all">所有未改正的错题</option><option value="star">收藏的题目</option></select></label><div id="reading-wrong-center"></div><p id="reading-total-stat" class="helper"></p></section><section class="card"><h2>我的错因分布</h2><div id="reading-reasons"></div><p class="helper">统计最近一次仍答错的题；在解析下标记原因。重新答对后移出错题集合。</p></section></aside>
           <div class="reading-main"><section id="reading-empty" class="card empty"><span>▤</span><p>准备好后，开始一篇阅读。</p><small>作答自动保存，交卷后再显示答案与解析。</small></section><div id="reading-work" hidden><section class="card article-card"><div class="section-heading"><h2 id="reading-title"></h2><span id="reading-kind" class="pill"></span></div><p class="helper">轻点英文词可查看或加入个人词库。暂缺释义的生词会标记“待完善”，不会混入背词队列。</p><div id="reading-passage" class="reading-passage"></div><div id="reading-word-tool" class="reading-word-tool" hidden><strong id="reading-word-label"></strong><span id="reading-word-definition"></span><button id="add-reading-word" class="soft">加入生词本</button><button id="edit-reading-word" class="soft" hidden>补充 / 编辑释义</button></div></section><section class="card reading-questions"><div class="section-heading"><h2>选择与证据</h2><span id="reading-result" class="pill"></span></div><div id="reading-question-list"></div><button id="submit-reading" class="primary">交卷并查看解析</button><div id="reading-restart" hidden><button id="new-reading-attempt" class="soft">重新练习全文</button></div></section></div></div>

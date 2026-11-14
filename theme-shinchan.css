@@ -1,0 +1,32 @@
+/* 蜡笔小新主题（Brian 个人主题）
+   - 全站背景：A 边框款（人物在四周、中间留白），叠浅色遮罩保证文字可读
+   - 宠物小屋背景：B 粉色拼贴款；原小屋的窗/架/地板图层隐藏，避免和图片场景打架
+   - 伙伴形象：pets.js 新增 shinchan 条目（小新和小白），此处只负责图片在头像框内的呈现
+   图片为网络收集的版权作品，仅供个人学习使用，不随公开/付费版本分发。 */
+body{
+  background-image:linear-gradient(rgba(245,244,238,.80),rgba(245,244,238,.88)),url('shinchan-bg-a.jpg');
+  background-size:cover;
+  background-position:center top;
+  background-attachment:fixed;
+  background-repeat:no-repeat;
+}
+body[data-theme="dark"]{
+  background-image:linear-gradient(rgba(22,26,22,.88),rgba(22,26,22,.93)),url('shinchan-bg-a.jpg');
+}
+html.shinchan-bg-off body{background-image:none}
+.room{
+  background-image:url('pet-bg-b.jpg');
+  background-size:cover;
+  background-position:center;
+}
+.room .room-window,.room .room-shelf,.room .room-floor{display:none}
+.pet-avatar .pet-img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:45%;
+}
+/* 首页伙伴位与升级庆祝图原本放 SVG（自适应宽度），图片版要显式约束尺寸 */
+.home-pet .pet-img{display:block;width:100%;height:auto;border-radius:24px}
+#celebration-art .pet-img{width:120px;height:120px;object-fit:cover;border-radius:45%}

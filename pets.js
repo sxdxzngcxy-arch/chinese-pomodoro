@@ -24,7 +24,8 @@ const pets={
  <path d="M54 56Q60 52 66 56Q65 62 60 63Q55 62 54 56" fill="#654735"/>
  <path d="M60 63v4m-8 0q4 7 8 0q4 7 8 0" fill="none" stroke="#79503b" stroke-width="2" stroke-linecap="round"/>
  <path class="pet-tongue" d="M56 70h8v4a4 4 0 0 1-8 0Z" fill="#db9b9b"/>
- </g></svg>`}
+ </g></svg>`},
+ shinchan:{id:'shinchan',name:'小新和小白',type:'蜡笔小新和小白',icon:'♡',svg:`<img class="pet-img" src="shinchan-pet.jpg" alt="蜡笔小新和小白" draggable="false">`}
 };
 if(typeof module!=='undefined'&&module.exports)module.exports=pets;else root.PET_CATALOG=pets;
 })(globalThis);
