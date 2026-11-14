@@ -22,7 +22,7 @@ function contentKey(r){
  const clean=s=>String(s).trim().replace(/\s+/g,' ').toLowerCase();
  return 'reading:'+JSON.stringify({paragraphs:r.payload.paragraphs.map(p=>clean(p.text)),questions:r.payload.questions.map(q=>({stem:clean(q.stem),options:q.options.map(o=>clean(o.text)).sort(),answer:clean(q.options.find(o=>o.id===q.answer)?.text||'')}))});
 }
-function baseline(words,articles){return{words:new Set(words.map(w=>L.canonical(w.word))),articles:articles.map(a=>({id:a.id,key:contentKey({kind:'reading',payload:a})}))};}
+function baseline(words,articles){return{words:new Set(words.filter(w=>!w.bundled).map(w=>L.canonical(w.word))),articles:articles.map(a=>({id:a.id,key:contentKey({kind:'reading',payload:a})}))};}
 function duplicate(record,existing,base){
  if(existing.some(r=>r.id===record.id))return '资料ID已存在，不会覆盖原资料。';
  if(record.kind==='vocabulary'){

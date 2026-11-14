@@ -55,7 +55,7 @@ function renderHistory(){
   actions.append(button('修改',()=>{editingDay=e.day;setForm(e);$('garden-form').scrollIntoView({block:'start',behavior:'instant'});$('garden-form').querySelector('input').focus({preventScroll:true});}),button(deleteDay===e.day?'确认删除':'删除',async()=>{
    if(deleteDay!==e.day){deleteDay=e.day;renderHistory();return;}
    const ok=await act(s=>{A.scrubGardenCopies(e.day);s.garden.entries=s.garden.entries.filter(item=>item.day!==e.day);});
-   if(ok){if(editingDay===e.day){editingDay=null;setForm();}deleteDay=null;renderHistory();status('这条心境记录已删除，学习记录和小满的状态保持。');}
+   if(ok){if(editingDay===e.day){editingDay=null;setForm();}deleteDay=null;renderHistory();status('这条心境记录已删除，学习记录和贝贝的状态保持。');}
   }));row.append(info,actions);$('garden-history').append(row);
  }
 }

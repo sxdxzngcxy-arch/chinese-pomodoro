@@ -1,0 +1,124 @@
+{
+  "prompts": [
+    {
+      "id": "beibei-writing-feedback",
+      "type": "writing",
+      "title": "原创模拟 · Using feedback to improve learning",
+      "prompt": "Discuss how students can use feedback productively. Give a concrete example and mention a limitation. Write about 150–200 words.",
+      "minutes": 30,
+      "template": "State your view.\nExplain how specific feedback guides revision.\nGive an example.\nDiscuss a limit and a practical response.",
+      "reference": "Feedback is useful when it helps a learner decide what to do next. A mark alone may show that a task was difficult, but a specific comment can reveal why an answer failed.\n\nFor instance, a student may understand a reading passage yet choose an option that goes beyond the evidence. Simply reading more quickly will not necessarily solve this problem. Recording the relevant sentence, the chosen option and the unsupported inference gives the student a clearer target. During the next practice, the student can check the scope of each claim before making a choice.\n\nHowever, collecting comments is not the same as using them. Too many suggestions at once can also become distracting. Learners should therefore select one or two changes, apply them in a new task and review the result.\n\nIn my view, effective feedback connects evidence with action. Students benefit most when they can explain a mistake and test a better approach, while remembering that improvement often requires repeated practice.",
+      "source": {
+        "kind": "original",
+        "label": "六级喵V4.4原创模拟练习",
+        "rights": "本项目原创文本与解析，允许随本项目部署、个人学习与备份。不是官方六级真题；录音为本机合成语音，不是真人考试录音。"
+      },
+      "year": null
+    },
+    {
+      "id": "beibei-writing-tools",
+      "type": "writing",
+      "title": "原创模拟 · Digital tools and independent judgment",
+      "prompt": "Discuss the role of digital tools in university study. Explain how students can use them while retaining independent judgment. Suggested length: 150–200 words.",
+      "minutes": 30,
+      "template": "Introduce a balanced position.\nDescribe one useful application.\nExplain the need for verification.\nConclude with a practical principle.",
+      "reference": "Digital tools can make university study more convenient, but convenience should not replace judgment. A useful tool helps a student ask better questions and examine evidence more clearly.\n\nFor example, a writing assistant may suggest a simpler sentence or point out a repeated idea. A vocabulary application can arrange brief reviews and preserve words collected from reading. These functions can reduce routine work and make progress easier to notice. Nevertheless, a fluent explanation may still contain an inaccurate claim, and a suggested source may need checking.\n\nStudents should therefore remain responsible for the material they use. They can compare a suggestion with the original text, verify references and decide whether an example actually supports their argument. Keeping earlier drafts also allows them to see which changes they understand and which they have accepted without reflection.\n\nThe aim is not to use every available feature. It is to choose a small number of reliable functions and use them deliberately. Technology supports learning best when students retain the ability to assess, revise and explain their own work.",
+      "source": {
+        "kind": "original",
+        "label": "六级喵V4.4原创模拟练习",
+        "rights": "本项目原创文本与解析，允许随本项目部署、个人学习与备份。不是官方六级真题；录音为本机合成语音，不是真人考试录音。"
+      },
+      "year": null
+    },
+    {
+      "id": "beibei-writing-rest",
+      "type": "writing",
+      "title": "原创模拟 · A sustainable approach to demanding goals",
+      "prompt": "Write about why a sustainable routine matters when working towards a demanding academic goal. Use an example. Suggested length: 150–200 words.",
+      "minutes": 30,
+      "template": "Describe the goal.\nExplain the role of small repeatable tasks.\nAddress rest and adjustment.\nGive a realistic conclusion.",
+      "reference": "A demanding academic goal usually requires more than a few days of intense effort. A sustainable routine makes it possible to return to difficult work without treating every interruption as failure.\n\nConsider a student preparing for an English examination while completing a research project. A plan that demands several hours of practice every evening may appear ambitious but become difficult to maintain. A shorter routine, with a clear listening task and a small number of review words, can provide a more reliable starting point. On days with more time, the student can add a focused reading exercise.\n\nRest is also part of this arrangement. It does not guarantee immediate success, but it allows the plan to respond to real limits. Regular review of the routine is equally important. If the student repeatedly makes the same type of mistake, the practice method may need changing.\n\nIn my opinion, consistency means returning thoughtfully to the goal, not repeating an unsuitable schedule forever. Small tasks, useful feedback and sensible adjustments can turn a demanding aim into a workable daily practice.",
+      "source": {
+        "kind": "original",
+        "label": "六级喵V4.4原创模拟练习",
+        "rights": "本项目原创文本与解析，允许随本项目部署、个人学习与备份。不是官方六级真题；录音为本机合成语音，不是真人考试录音。"
+      },
+      "year": null
+    },
+    {
+      "id": "beibei-writing-community",
+      "type": "writing",
+      "title": "原创模拟 · Learning through community projects",
+      "prompt": "Discuss what university students can learn from participating in a community project. Include both opportunities and responsibilities. Suggested length: 150–200 words.",
+      "minutes": 30,
+      "template": "Describe the opportunity.\nGive a specific community activity.\nExplain responsibility and evidence.\nConclude.",
+      "reference": "Community projects can connect academic learning with practical needs. They give students opportunities to communicate with people whose experiences differ from their own and to see the limits of a plan outside the classroom.\n\nFor example, students helping with a neighbourhood bird survey may learn to record observations consistently. They must note the location and the time, distinguish a confident identification from a doubtful one, and avoid disturbing wildlife. The value of their contribution depends on both participation and care. A large number of records is not automatically a reliable collection.\n\nSuch work also involves responsibility to the community. Students should listen before proposing changes, explain what information they are collecting and avoid making promises that the project cannot fulfil. When results are shared, uncertainty and uneven coverage should remain visible.\n\nI believe community participation is most educational when it combines action with reflection. Students can learn useful skills and contribute to a shared aim, provided that enthusiasm is matched by clear methods, respectful communication and a willingness to revise their assumptions.",
+      "source": {
+        "kind": "original",
+        "label": "六级喵V4.4原创模拟练习",
+        "rights": "本项目原创文本与解析，允许随本项目部署、个人学习与备份。不是官方六级真题；录音为本机合成语音，不是真人考试录音。"
+      },
+      "year": null
+    },
+    {
+      "id": "beibei-translation-library",
+      "type": "translation",
+      "title": "原创模拟 · 校园图书馆",
+      "prompt": "将下面的原创段落译成英文：\n近年来，大学图书馆的功能更加多样。除了借阅书籍，学生还可以使用自习室、参加信息检索培训，或者与同伴讨论项目。为了让有限的空间得到合理使用，一些图书馆实行座位预约制度。如果计划发生变化，学生应及时取消预约。便利的数字服务有助于提高效率，但也应为不熟悉系统的人保留必要的人工帮助。",
+      "minutes": 30,
+      "template": "先确定句子主干，再处理修饰。\n核对时态、主谓一致、代词指代与逻辑连接。\n参考译文是表达示例，不是唯一答案。",
+      "reference": "In recent years, university libraries have become more diverse in their functions. In addition to borrowing books, students can use study rooms, attend training in information retrieval, or discuss projects with their peers. To make sensible use of limited space, some libraries operate a seat reservation system. Students should cancel their bookings promptly if their plans change. Convenient digital services can help improve efficiency, but necessary personal assistance should also remain available to people who are unfamiliar with the system.",
+      "source": {
+        "kind": "original",
+        "label": "六级喵V4.4原创模拟练习",
+        "rights": "本项目原创文本与解析，允许随本项目部署、个人学习与备份。不是官方六级真题；录音为本机合成语音，不是真人考试录音。"
+      },
+      "year": null
+    },
+    {
+      "id": "beibei-translation-transport",
+      "type": "translation",
+      "title": "原创模拟 · 绿色出行",
+      "prompt": "将下面的原创段落译成英文：\n改善城市交通需要综合考虑多种因素。共享自行车可以方便短途出行，但使用次数增加并不一定意味着汽车出行同等减少。管理者还应了解这些骑行替代了什么出行方式，检查停车安排是否影响行人，并评估维护成本。只有结合不同方面的信息，才能更全面地判断一项措施的实际效果。",
+      "minutes": 30,
+      "template": "先确定句子主干，再处理修饰。\n核对时态、主谓一致、代词指代与逻辑连接。\n参考译文是表达示例，不是唯一答案。",
+      "reference": "Improving urban transport requires consideration of several factors. Shared bicycles can make short journeys more convenient, but an increase in their use does not necessarily mean an equal reduction in car travel. Managers should also find out which modes of travel these rides replace, check whether parking arrangements affect pedestrians, and assess maintenance costs. Only by considering information from different perspectives can the practical effects of a measure be evaluated more comprehensively.",
+      "source": {
+        "kind": "original",
+        "label": "六级喵V4.4原创模拟练习",
+        "rights": "本项目原创文本与解析，允许随本项目部署、个人学习与备份。不是官方六级真题；录音为本机合成语音，不是真人考试录音。"
+      },
+      "year": null
+    },
+    {
+      "id": "beibei-translation-research",
+      "type": "translation",
+      "title": "原创模拟 · 科研记录",
+      "prompt": "将下面的原创段落译成英文：\n清晰的研究记录有助于团队理解工作的进展。研究者不仅应保存成功的结果，也需要记录方法、条件和遇到的问题。结果与预期不同并不意味着记录没有价值。相反，这些信息可能帮助团队发现局限，改进后续设计。分享研究发现时，明确说明不确定性与适用范围，同样是负责任的做法。",
+      "minutes": 30,
+      "template": "先确定句子主干，再处理修饰。\n核对时态、主谓一致、代词指代与逻辑连接。\n参考译文是表达示例，不是唯一答案。",
+      "reference": "Clear research records help a team understand the progress of its work. Researchers should preserve not only successful results but also the methods, conditions and problems encountered. A result that differs from expectations does not mean that the record has no value. On the contrary, such information may help the team identify limitations and improve subsequent designs. When sharing findings, clearly explaining uncertainty and the scope of their application is also a responsible practice.",
+      "source": {
+        "kind": "original",
+        "label": "六级喵V4.4原创模拟练习",
+        "rights": "本项目原创文本与解析，允许随本项目部署、个人学习与备份。不是官方六级真题；录音为本机合成语音，不是真人考试录音。"
+      },
+      "year": null
+    },
+    {
+      "id": "beibei-translation-learning",
+      "type": "translation",
+      "title": "原创模拟 · 学习与反馈",
+      "prompt": "将下面的原创段落译成英文：\n有效的学习并不只是反复阅读相同的材料。学生可以先尝试凭记忆解释一个概念，再查看笔记并修正理解。这个过程可能让错误更加明显，却能帮助学生确定接下来应该练习什么。合理安排复习间隔，并根据实际表现调整计划，往往比单纯追求每天完成的数量更有针对性。",
+      "minutes": 30,
+      "template": "先确定句子主干，再处理修饰。\n核对时态、主谓一致、代词指代与逻辑连接。\n参考译文是表达示例，不是唯一答案。",
+      "reference": "Effective learning involves more than repeatedly reading the same material. Students can first try to explain a concept from memory, then consult their notes and correct their understanding. This process may make mistakes more visible, but it can help students identify what to practise next. Scheduling reviews at sensible intervals and adjusting the plan according to actual performance can provide a more focused approach than simply pursuing the number of tasks completed each day.",
+      "source": {
+        "kind": "original",
+        "label": "六级喵V4.4原创模拟练习",
+        "rights": "本项目原创文本与解析，允许随本项目部署、个人学习与备份。不是官方六级真题；录音为本机合成语音，不是真人考试录音。"
+      },
+      "year": null
+    }
+  ]
+}

@@ -185,7 +185,7 @@ $('confirm-materials').addEventListener('click',async()=>{
   lastCommit={at:new Date().toISOString(),added:result.added,skipped:totalSkipped,issues,storageSkipped:result.skipped};
   drafts=drafts.filter(d=>!accepted.has(d));retiredInput=[];previewPage=0;$('materials-reviewed').checked=false;
   $('materials-commit-status').textContent=`保存完成：新增 ${result.added} 项，跳过 ${totalSkipped} 项。未导入项目仍在预览，可筛选问题、编辑并再次确认。${result.refreshPending?' 请重新连接以加载已保存资料。':''}`;
-  if(result.refreshPending){ready=false;$('materials-retry').hidden=false;status(result.message);}else status(`已导入 ${result.added} 项，跳过 ${totalSkipped} 项。重复资料不覆盖；待修复项目保留。详情可导出报告，背词与阅读已接入新资料。`);
+  if(result.refreshPending){ready=false;$('materials-retry').hidden=false;status(result.message);}else status(`已导入 ${result.added} 项，跳过 ${totalSkipped} 项。重复资料不覆盖；待修复项目保留。详情可导出报告，背词与阅读已接入新资料；当前可学词库 ${L.catalog(WORDS,A.getState().study).length} 词（重合词不重复累计）。`);
   await storageInfo();
  }catch(e){$('materials-commit-status').textContent='未完成导入；预览仍保留，请核对提示后重试。';status(e.message);}
  finally{working=false;renderPreview();renderLibrary();}

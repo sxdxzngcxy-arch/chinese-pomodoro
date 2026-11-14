@@ -23,9 +23,9 @@ function word(raw,{pending=false}={}){
  for(const key of ['ipa','pos','meaning','example','translation','collocations','association','source']){const v=raw[key]??'';if(!text(v,key==='pos'?100:2000))throw Error(`${name} 的 ${key} 过长或格式无效。`);w[key]=v.trim();}
  w.pending=!w.meaning;return w;
 }
-function catalog(builtin,study,{includePending=false}={}){const names=new Set();return [...builtin,...study.customWords,...external.words].filter(w=>{const name=canonical(w.word);if(names.has(name)||(!includePending&&w.pending))return false;names.add(name);return true;});}
+function catalog(builtin,study,{includePending=false}={}){const names=new Set();return [...builtin.filter(w=>!w.bundled),...study.customWords,...external.words,...builtin.filter(w=>w.bundled)].filter(w=>{const name=canonical(w.word);if(names.has(name)||(!includePending&&w.pending))return false;names.add(name);return true;});}
 function addWord(s,raw,builtin,{pending=false}={}){
- const w=word(raw,{pending});const existing=catalog(builtin,s.study,{includePending:true}).find(x=>canonical(x.word)===w.word);
+ const w=word(raw,{pending});const existing=catalog(builtin,s.study,{includePending:true}).find(x=>canonical(x.word)===w.word&&!x.bundled);
  if(existing)return {added:false,word:existing};
  if(s.study.customWords.length>=5000)throw Error('个人词库最多 5000 词，请先整理。');
  s.study.customWords.push(w);return{added:true,word:w};

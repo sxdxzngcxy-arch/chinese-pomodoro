@@ -6,7 +6,7 @@ const learningQueue=(s,kind,now)=>L.queue(s,L.catalog(WORDS,s.study),kind,now,C.
 let state, busy=false, storageBlocked=false, storageUnavailable=false, filter='learn', current=null, revealed=false, quizQuestion=null, importCandidate=null, importMaterials=null, page='focus', lastDay=C.day(), quizDirection='en-zh';
 const clone=x=>JSON.parse(JSON.stringify(x));
 let noticeTimer;
-function notify(text){const name=window.PET_CATALOG?.[state?.pet?.species]?.name||'小满';text=String(text).replaceAll('小满',name);$('notice').textContent=text;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>{$('notice').textContent='';},10000);}
+function notify(text){const name=window.PET_CATALOG?.[state?.pet?.species]?.name||'贝贝';text=String(text).replaceAll('贝贝',name);$('notice').textContent=text;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>{$('notice').textContent='';},10000);}
 function read(){
  if(storageUnavailable)return clone(state||C.fresh());
  try{
@@ -23,6 +23,7 @@ function read(){
 function write(next){
  if(storageUnavailable){state=next;return;}
  const previous=localStorage.getItem(C.KEY);
+ if(previous&&!storageBlocked&&JSON.parse(previous).platform?.release44!==true&&!localStorage.getItem(`${C.KEY}-before-v4.4`))localStorage.setItem(`${C.KEY}-before-v4.4`,previous);
  if(previous&&!storageBlocked&&!JSON.parse(previous).platform&&!localStorage.getItem(`${C.KEY}-before-v2.0`))localStorage.setItem(`${C.KEY}-before-v2.0`,previous);
  if(previous&&!storageBlocked&&!JSON.parse(previous).study?.vocabulary&&!localStorage.getItem(`${C.KEY}-before-v1.2`))localStorage.setItem(`${C.KEY}-before-v1.2`,previous);
  localStorage.setItem(C.KEY,JSON.stringify(next));state=next;
@@ -40,7 +41,7 @@ async function transact(action,{restore=false,settleTimer=true}={}){
    next.revision++;write(next);
    if(finished==='focus')celebrate();else if(finished==='break')notify('休息结束。准备好了，再开启下一段专注吧。');
    renderAll();
-   if(!restore&&Object.keys(next.ledger).filter(k=>k.startsWith('daily30:')).length>previousDaily){celebrate('words');notify('今天学过 30 个新词！小满为你庆祝，+20 金币、+2 食物。');}
+   if(!restore&&Object.keys(next.ledger).filter(k=>k.startsWith('daily30:')).length>previousDaily){celebrate('words');notify('今天学过 30 个新词！贝贝为你庆祝，+20 金币、+2 食物。');}
    if(!restore&&1+Math.floor(next.pet.xp/100)>previousLevel){celebrate('level');animatePet('leveling',2600);$('pet-message').textContent=`${PET_CATALOG[next.pet.species]?.name||'伙伴'}升级到 Lv.${1+Math.floor(next.pet.xp/100)} 啦！谢谢你的一点点陪伴。`;notify($('pet-message').textContent);}
    return result===undefined?true:result;
   };
@@ -77,7 +78,7 @@ function renderTimer(){
  $('clock-caption').textContent=t.mode==='focus'?'给自己一段不被打扰的时间':'伸个懒腰，让思绪透透气';
  $('start').textContent=t.endAt!==null?'暂停计时  Ⅱ':t.remaining<t.total?'继续计时  ▶':t.mode==='focus'?'开始专注  ▶':'开始休息  ▶';
  $('companion-text').textContent=t.mode==='break'?'休息时间，去小屋摸摸学习伙伴吧。':'完成专注，为学习伙伴积攒成长能量。';
- document.title=`${t.endAt!==null?formatted+' · ':''}六级喵 · 学习与心境伙伴`;
+ document.title=`${t.endAt!==null?formatted+' · ':''}六级喵 V4.4 · 贝贝伴学`;
 
 }
 function renderFocusStats(){
@@ -127,7 +128,7 @@ function renderWords(){
  $('word-session-state').textContent=active?`正在${{learn:'今日学习',review:'到期复习',wrong:'错词练习'}[a.kind]} · 本轮已自动保存。${item.mode==='practice'?'此词为额外练习，不改变间隔、不发经验。':''}`:filter==='wrong'?'错词按复习目标数量组成一轮；未到期或超过目标的词仅作额外练习。':'按剩余新词目标与复习目标组成一轮；没有足够到期词时按实际数量学习。';
  renderWordDashboard(now);
  if(current){
-  const w=current;$('word-en').textContent=w.word;$('word-ipa').textContent=w.ipa;$('word-pos').textContent=w.pos;$('word-meaning').textContent=w.meaning;$('word-example').textContent=w.example;$('word-translation').textContent=w.translation;
+  const w=current;$('word-en').textContent=w.word;$('word-ipa').textContent=w.ipa||'音标未整理 · 可点系统发音';$('word-pos').textContent=w.pos;$('word-meaning').textContent=w.meaning;$('word-example').textContent=w.example||'此词暂缺例句，先练习释义与主动回忆。';$('word-translation').textContent=w.translation;
   $('word-tag').textContent=`${L.status(state.progress[w.id])} · ${{new:'新词',review:'到期复习',practice:'额外练习'}[item.mode]}`;$('flashcard').classList.toggle('flipped',revealed);$('flashcard').setAttribute('aria-expanded',String(revealed));
   $('flashcard').querySelector('.card-front').setAttribute('aria-hidden',String(revealed));$('flashcard').querySelector('.card-back').setAttribute('aria-hidden',String(!revealed));
   $('flashcard').setAttribute('aria-label',revealed?`${w.word}：${w.meaning}。${w.example} ${w.translation}。点击返回英文`:`${w.word}，${w.ipa}。点击翻转查看释义`);
@@ -197,7 +198,7 @@ function renderStats(){
  $('all-stats').textContent=`当前词库已学 ${words.filter(w=>state.progress[w.id]).length} / ${words.length} 词 · 累计专注 ${Object.values(state.counts).reduce((a,b)=>a+b,0)} 次 / ${Object.values(state.focusMinutes).reduce((a,b)=>a+b,0)} 分钟。断签不会扣除记录或宠物状态。`;
  $('storage-state').textContent=storageBlocked?'原始数据异常，写入已暂停。导出会保留原始文本。':storageUnavailable?'内存模式：离开前务必导出。':navigator.locks?'本地自动保存已启用；多标签操作通过浏览器锁串行结算。':'本地自动保存已启用。此浏览器不支持跨标签锁，请只打开一个页面，避免同时修改。';
 }
-function renderAll(){words=L.catalog(WORDS,state.study);if(!$('time-form').contains(document.activeElement)){$('focus-length').value=state.settings.focus;$('break-length').value=state.settings.break;}applyTheme();renderTimer();renderFocusStats();renderTasks();renderWords();renderPet();renderStats();window.LearningUI?.render();window.GardenUI?.render();window.MaterialsUI?.render();window.PlatformUI?.render();window.ListeningUI?.render();window.WritingUI?.render();}
+function renderAll(){words=L.catalog(WORDS,state.study);if(!$('time-form').contains(document.activeElement)){$('focus-length').value=state.settings.focus;$('break-length').value=state.settings.break;}applyTheme();renderTimer();renderFocusStats();renderTasks();renderWords();renderPet();renderStats();window.LearningUI?.render();window.GardenUI?.render();window.MaterialsUI?.render();window.PlatformUI?.render();window.ListeningUI?.render();window.WritingUI?.render();window.V44UI?.render();}
 const animationTimers={};
 function animatePet(kind,ms=1900){
  const room=$('room');room.classList.remove(kind);void room.offsetWidth;room.classList.add(kind);clearTimeout(animationTimers[kind]);animationTimers[kind]=setTimeout(()=>room.classList.remove(kind),ms);
@@ -213,7 +214,7 @@ function celebrate(type='focus'){
 async function petAction(action){
  let message='',wasSleeping=state.pet.sleeping;
  const ok=await transact(s=>{message=C.interact(s,action,Date.now());});
- if(ok){$('pet-message').textContent=message.replaceAll('小满',PET_CATALOG[state.pet.species]?.name||'小满');
+ if(ok){$('pet-message').textContent=message.replaceAll('贝贝',PET_CATALOG[state.pet.species]?.name||'贝贝');
   if(!state.pet.sleeping){if(action==='pat')animatePet('petting');if(action==='play')animatePet('playing');if(action==='feed')animatePet('petting');if(action==='sleep'&&wasSleeping)animatePet('waking');}
  }
 }
@@ -288,12 +289,12 @@ window.addEventListener('storage',e=>{if(e.key===C.KEY&&!busy){state=read();curr
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){state=read();tick();renderAll();}});window.addEventListener('pageshow',()=>tick());
 function scrubGardenCopies(day=null){
  if(storageUnavailable)return;
- const keys=[`${C.KEY}-before-import`,`${C.KEY}-before-v1.1`,`${C.KEY}-before-v1.2`,`${C.KEY}-before-v2.0`];
+ const keys=[`${C.KEY}-before-import`,`${C.KEY}-before-v1.1`,`${C.KEY}-before-v1.2`,`${C.KEY}-before-v2.0`,`${C.KEY}-before-v4.4`];
  for(const key of keys){const raw=localStorage.getItem(key);if(!raw)continue;const copy=JSON.parse(raw);if(!copy.garden)continue;if(!Array.isArray(copy.garden.entries))throw Error('本地恢复副本中的心境格式异常，未完成清除。');copy.garden.entries=day?copy.garden.entries.filter(e=>e.day!==day):[];localStorage.setItem(key,JSON.stringify(copy));}
 }
 window.StudyApp={isStorageBlocked:()=>storageBlocked,isMemoryOnly:()=>storageUnavailable,finishRestore:()=>{storageBlocked=false;current=null;quizQuestion=null;revealed=false;renderAll();},celebrate,animatePet,getState:()=>state,getFreshState:()=>read(),refreshMaterials:()=>renderAll(),getPage:()=>page,isBusy:()=>busy,scrubGardenCopies,transact,notify,node,button,navigate,getCurrent:()=>current,refreshWords:()=>{words=L.catalog(WORDS,state.study);renderWords();},download};
 state=read();
-if(!storageBlocked&&!storageUnavailable){try{const previous=localStorage.getItem(C.KEY);if(!previous||!JSON.parse(previous).study){if(previous&&!localStorage.getItem(`${C.KEY}-before-v1.1`))localStorage.setItem(`${C.KEY}-before-v1.1`,previous);write(state);}}catch(e){notify('升级数据暂未保存，请检查存储空间并导出备份。');}}
+if(!storageBlocked&&!storageUnavailable){try{const previous=localStorage.getItem(C.KEY);if(!previous||!JSON.parse(previous).study||JSON.parse(previous).platform?.release44!==true){if(previous&&!JSON.parse(previous).study&&!localStorage.getItem(`${C.KEY}-before-v1.1`))localStorage.setItem(`${C.KEY}-before-v1.1`,previous);write(state);}}catch(e){notify('升级数据暂未保存，请检查存储空间并导出备份。');}}
 navigate(location.hash.slice(1)||'home');tick();setInterval(tick,1000);
 if(!navigator.locks)notify('此浏览器不支持跨标签锁，建议只打开一个学习页面以保持记录一致。');
 })();

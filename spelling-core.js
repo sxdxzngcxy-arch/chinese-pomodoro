@@ -1,0 +1,14 @@
+/* 独立拼写练习：只保存练习记录，不修改原SRS、不发奖励。 */
+(function(root){
+'use strict';
+const safe=id=>typeof id==='string'&&id.length<=160&&!['__proto__','constructor','prototype'].includes(id)&&/^[a-zA-Z0-9:_' -]+$/.test(id);
+const number=v=>Number.isFinite(v)&&v>=0&&v<=1e15;
+const canonical=s=>String(s).trim().toLowerCase().replace(/[’]/g,"'").replace(/\s+/g,' ');
+const fresh=()=>({mode:'meaning',active:null,history:[]});
+function normalize(raw){if(raw===undefined)return fresh();if(!raw||!['meaning','sound'].includes(raw.mode)||!Array.isArray(raw.history)||raw.history.length>100)throw Error('拼写练习数据无效。');const s=fresh();s.mode=raw.mode;s.history=raw.history.map(h=>{if(!safe(h.id)||!number(h.at)||!Number.isInteger(h.total)||h.total<0||h.total>30||!Number.isInteger(h.correct)||h.correct<0||h.correct>h.total)throw Error('拼写历史无效。');return{id:h.id,at:h.at,total:h.total,correct:h.correct};});if(raw.active!==null){const a=raw.active;if(!a||!safe(a.id)||!Array.isArray(a.ids)||!a.ids.length||a.ids.length>30||new Set(a.ids).size!==a.ids.length||a.ids.some(id=>!safe(id))||!Number.isInteger(a.index)||a.index<0||a.index>a.ids.length||!number(a.startedAt)||typeof a.draft!=='string'||a.draft.length>100||!Array.isArray(a.answers)||a.answers.length>a.ids.length)throw Error('拼写轮次无效。');const answers=a.answers.map((x,i)=>{if(!x||x.id!==a.ids[i]||typeof x.input!=='string'||x.input.length>100||typeof x.correct!=='boolean'||!number(x.at))throw Error('拼写作答无效。');return{id:x.id,input:x.input,correct:x.correct,at:x.at};});if((answers.length<a.index&&a.index!==a.ids.length)||(answers.length>a.index+1&&a.index!==a.ids.length))throw Error('拼写位置无效。');s.active={id:a.id,ids:[...a.ids],index:a.index,startedAt:a.startedAt,draft:a.draft,answers};}return s;}
+function start(s,ids,id,now){if(!ids.length)throw Error('当前没有可练习词。');s.platform.spelling.active={id,ids:[...new Set(ids)].slice(0,10),index:0,startedAt:now,draft:'',answers:[]};}
+function check(s,round,index,input,word,now){const a=s.platform.spelling.active;if(!a||a.id!==round||a.index!==index||a.answers[index]||a.ids[index]!==word.id)return false;if(!input.trim())throw Error('先输入你回忆的英文。');const result={id:word.id,input:input.slice(0,100),correct:canonical(input)===canonical(word.word),at:now};a.answers.push(result);a.draft=input.slice(0,100);return result;}
+function finish(s,now){const d=s.platform.spelling,a=d.active;if(!a)return;if(!d.history.some(h=>h.id===a.id))d.history=[{id:a.id,at:now,total:a.answers.length,correct:a.answers.filter(x=>x.correct).length},...d.history].slice(0,100);a.index=a.ids.length;a.draft='';}
+function next(s,round,index,now){const a=s.platform.spelling.active;if(!a||a.id!==round||a.index!==index||!a.answers[index])return false;a.index++;a.draft='';if(a.index>=a.ids.length)finish(s,now);return true;}
+const api={fresh,normalize,start,check,next,finish};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.SpellingCore=api;
+})(globalThis);

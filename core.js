@@ -8,7 +8,7 @@ const DAY=86400000, KEY='yike-study-v2', LEGACY='yike-pomodoro-v1';
 const day=(ms=Date.now())=>{const d=new Date(ms);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
 const addDay=(ms,n)=>{const d=new Date(ms);d.setDate(d.getDate()+n);return d.getTime();};
 const uid=()=>globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;
-const fresh=()=>({version:2,platform:P.fresh(),garden:G.fresh(),study:L.fresh(),settings:{goal:30,focus:25,break:5,theme:'system',reduced:false},tasks:[],counts:{},focusMinutes:{},days:{},progress:{},pet:{species:'cat',xp:0,coins:0,food:3,mood:80,hunger:80,bond:0,sleeping:false,owned:[],cooldowns:{}},ledger:{},timer:{mode:'focus',remaining:1500,endAt:null,id:null,total:1500},revision:0});
+const fresh=()=>({version:2,platform:P.fresh(),garden:G.fresh(),study:L.fresh(),settings:{goal:30,focus:25,break:5,theme:'system',reduced:false},tasks:[],counts:{},focusMinutes:{},days:{},progress:{},pet:{species:'teddy',xp:0,coins:0,food:3,mood:80,hunger:80,bond:0,sleeping:false,owned:[],cooldowns:{}},ledger:{},timer:{mode:'focus',remaining:1500,endAt:null,id:null,total:1500},revision:0});
 const obj=x=>x!==null && typeof x==='object' && !Array.isArray(x);
 const safeKey=k=> !['__proto__','constructor','prototype'].includes(k);
 const numeric=(v,min=0,max=1e15)=>Number.isFinite(v)&&v>=min&&v<=max;
@@ -37,7 +37,7 @@ function normalize(raw, wordIds){
  if(!obj(raw.ledger)||Object.keys(raw.ledger).length>200000)throw Error('结算记录无效。');
  for(const [k,v]of Object.entries(raw.ledger)){if(!safeKey(k)||k.length>240||!numeric(v))throw Error('结算记录无效。');s.ledger[k]=v;}
  const t=raw.timer;if(!obj(t)||!['focus','break'].includes(t.mode)||!numeric(t.total,60,10800)||!numeric(t.remaining,0,t.total)||(t.endAt!==null&&!numeric(t.endAt,1,1e15))||(t.id!==null&&(typeof t.id!=='string'||!safeKey(t.id)||t.id.length>100))||(t.endAt!==null&&!t.id))throw Error('计时状态无效。');
- s.timer={mode:t.mode,total:t.total,remaining:t.remaining,endAt:t.endAt,id:t.id};s.revision=integer(raw.revision)?raw.revision:0;s.study=L.normalize(raw.study);s.garden=G.normalize(raw.garden);s.platform=P.normalize(raw.platform);
+ s.timer={mode:t.mode,total:t.total,remaining:t.remaining,endAt:t.endAt,id:t.id};s.revision=integer(raw.revision)?raw.revision:0;s.study=L.normalize(raw.study);s.garden=G.normalize(raw.garden);s.platform=P.normalize(raw.platform);if(raw.platform?.release44!==true){s.pet.species='teddy';s.platform.release44=true;}
  return s;
 }
 function migrate(old){
@@ -149,19 +149,19 @@ function quiz(s,id,direction,answer,correctAnswer,now){
 }
 function interact(s,action,now){
  const p=s.pet;
- if(action==='sleep'){p.sleeping=!p.sleeping;return p.sleeping?'小满蜷起来睡着了，安心做自己的事吧。':'小满醒来啦，伸了一个大懒腰。';}
- if(p.sleeping)return '小满正在休息，先轻轻唤醒它吧。';
+ if(action==='sleep'){p.sleeping=!p.sleeping;return p.sleeping?'贝贝蜷起来睡着了，安心做自己的事吧。':'贝贝醒来啦，伸了一个大懒腰。';}
+ if(p.sleeping)return '贝贝正在休息，先轻轻唤醒它吧。';
  if(action==='feed'){
   if(p.food<1)return '食物暂时用完了；完成每日 30 新词可获得 2 份食物。';
-  if(p.hunger>=100)return '小满已经吃饱啦，食物留到下次吧。';
-  p.food--;p.hunger=Math.min(100,p.hunger+20);p.mood=Math.min(100,p.mood+5);p.bond=Math.min(100,p.bond+2);return '小满吃得很开心，谢谢你的照顾。';
+  if(p.hunger>=100)return '贝贝已经吃饱啦，食物留到下次吧。';
+  p.food--;p.hunger=Math.min(100,p.hunger+20);p.mood=Math.min(100,p.mood+5);p.bond=Math.min(100,p.bond+2);return '贝贝吃得很开心，谢谢你的照顾。';
  }
  if(!['pat','play'].includes(action))return '';
  const wait=action==='pat'?60000:600000;
- if(p.cooldowns[action]&&now-p.cooldowns[action]<wait)return '小满还在回味刚才的快乐，过一会儿再来吧。';
+ if(p.cooldowns[action]&&now-p.cooldowns[action]<wait)return '贝贝还在回味刚才的快乐，过一会儿再来吧。';
  p.cooldowns[action]=now;p.bond=Math.min(100,p.bond+(action==='pat'?1:3));p.mood=Math.min(100,p.mood+5);
  if(action==='play')p.hunger=Math.max(20,p.hunger-5);
- return action==='pat'?'尾巴摇呀摇～小满开心地蹭了蹭你的手。':'一起追了会儿小球，真是愉快的休息！';
+ return action==='pat'?'尾巴摇呀摇～贝贝开心地蹭了蹭你的手。':'一起追了会儿小球，真是愉快的休息！';
 }
 const shop={plant:{name:'窗边绿植',price:30},rug:{name:'柔软地毯',price:50},lamp:{name:'暖光台灯',price:80}};
 function buy(s,id){if(!Object.hasOwn(shop,id)||s.pet.owned.includes(id)||s.pet.coins<shop[id].price)return false;s.pet.coins-=shop[id].price;s.pet.owned.push(id);return true;}

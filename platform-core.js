@@ -1,6 +1,7 @@
 /* V2 增量状态与训练规则；不读取 DOM、存储或网络。旧版主数据仍使用原 key。 */
 (function(root){
 'use strict';
+const S=typeof module!=='undefined'&&module.exports?require('./spelling-core.js'):root.SpellingCore;
 const obj=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 const safe=k=>typeof k==='string'&&/^[a-zA-Z0-9_:-]{1,160}$/.test(k)&&!['__proto__','constructor','prototype'].includes(k);
 const text=(v,max=2000)=>typeof v==='string'&&v.length<=max;
@@ -9,7 +10,7 @@ const integer=(v,max)=>Number.isSafeInteger(v)&&v>=0&&v<=max;
 const date=k=>{try{return typeof k==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(k)&&new Date(k+'T12:00:00Z').toISOString().slice(0,10)===k;}catch{return false;}};
 const routes=['home','focus','words','reading','listening','writing','pet','stats','garden','materials','training'];
 const checks=['respond','structure','grammar','spelling','revise'];
-const fresh=()=>({schema:1,plan:{reading:1,listening:10,examDate:'',font:'normal',mode:'standard'},lastPage:'home',days:{},readingFavorites:[],expressions:[],listening:{active:null,lessons:[],progress:{}},writing:{prompts:[],drafts:{},active:null},backupAt:0});
+const fresh=()=>({schema:1,release44:true,spelling:S.fresh(),plan:{reading:1,listening:10,examDate:'',font:'normal',mode:'standard'},lastPage:'home',days:{},readingFavorites:[],expressions:[],listening:{active:null,lessons:[],progress:{}},writing:{prompts:[],drafts:{},active:null},backupAt:0});
 function source(s){if(!obj(s)||!['original','user-provided','licensed','public-domain'].includes(s.kind)||!text(s.label,200)||!s.label.trim()||!text(s.rights,1000)||!s.rights.trim())throw Error('请填写资料来源和使用许可，不确定的内容请先人工核对。');return{kind:s.kind,label:s.label.trim(),rights:s.rights.trim()};}
 function year(y){if(y===undefined||y===null||y==='')return null;if(!Number.isInteger(y)||y<1900||y>2100)throw Error('年份必须在1900–2100之间，未知可留空。');return y;}
 function lesson(x){
@@ -22,7 +23,7 @@ function lesson(x){
 function prompt(x){if(!obj(x)||!safe(x.id)||!['writing','translation'].includes(x.type)||!text(x.title,200)||!x.title.trim()||!text(x.prompt,12000)||!x.prompt.trim()||!integer((x.minutes===undefined?30:x.minutes),180)||!((x.minutes===undefined?30:x.minutes)))throw Error('写作/翻译题目需要唯一ID、类型、标题、题干和1–180分钟时长。');for(const k of ['reference','template'])if(x[k]!==undefined&&!text(x[k],20000))throw Error('参考文本过长或格式无效。');return{id:x.id,type:x.type,title:x.title.trim(),prompt:x.prompt.trim(),minutes:(x.minutes===undefined?30:x.minutes),reference:x.reference||'',template:x.template||'',source:source(x.source),year:year(x.year)};}
 function normalize(raw){
  if(raw===undefined)return fresh();if(!obj(raw)||raw.schema!==1)throw Error('V2扩展数据版本无效。');
- const s=fresh(),p=raw.plan;
+ const s=fresh(),p=raw.plan;if(raw.release44!==undefined&&typeof raw.release44!=='boolean')throw Error('升级标记无效。');s.release44=raw.release44===true;s.spelling=S.normalize(raw.spelling);
  if(!obj(p)||!integer(p.reading,20)||!integer(p.listening,180)||!(p.examDate===''||date(p.examDate))||!['normal','large','larger'].includes(p.font)||!['light','standard','sprint'].includes(p.mode)||!routes.includes(raw.lastPage)||!num(raw.backupAt))throw Error('每日计划或显示设置无效。');
  s.plan={reading:p.reading,listening:p.listening,examDate:p.examDate,font:p.font,mode:p.mode};s.lastPage=raw.lastPage;s.backupAt=raw.backupAt;
  if(!obj(raw.days)||Object.keys(raw.days).length>10000)throw Error('训练活动记录无效。');

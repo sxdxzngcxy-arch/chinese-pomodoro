@@ -1,0 +1,353 @@
+{
+  "version": "4.4",
+  "baseCommit": "26ef40cbcde62a67df5990e74bd83b6fc7927fc9",
+  "branch": "update/v4.4-beibei-study",
+  "deployment": "not published",
+  "builtIn": {
+    "words": 1675,
+    "readingArticles": 7,
+    "readingQuestions": 23,
+    "audioLessons": 6,
+    "writingPrompts": 5,
+    "translationPrompts": 5
+  },
+  "externalDictionaryBundled": false,
+  "files": [
+    {
+      "path": "app.js",
+      "bytes": 34796,
+      "sha256": "b6306a2560aecd1db6851f5a0bf2411040bfde6d3c826c46d0e6dad884d49ab8",
+      "change": "modified"
+    },
+    {
+      "path": "backup.js",
+      "bytes": 10339,
+      "sha256": "9a134001cee123cd962a018308f1d7f452eff7108874161b83eae13182fcb243",
+      "change": "modified"
+    },
+    {
+      "path": "beibei-listening-01.mp3",
+      "bytes": 194394,
+      "sha256": "ac16e652edc4a48aa2c7b14c51394362a91bd675a2b42fe70f947052a2d107c7",
+      "change": "added"
+    },
+    {
+      "path": "beibei-listening-02.mp3",
+      "bytes": 209231,
+      "sha256": "a5dcf23c28e375101c67c256c9fda93da0cfa6f4f14cd9a14c630e9d7800ac5e",
+      "change": "added"
+    },
+    {
+      "path": "beibei-listening-03.mp3",
+      "bytes": 213829,
+      "sha256": "0f1db6317c14e9af9a9a6a85a91353431a7784a7af05d66e5c63c6c9ee851dc4",
+      "change": "added"
+    },
+    {
+      "path": "beibei-listening-04.mp3",
+      "bytes": 209858,
+      "sha256": "c71a8d052cf0e3b01ade9ae53b2142548e03603d00114ef9c0ec7d8153ad2643",
+      "change": "added"
+    },
+    {
+      "path": "beibei-listening-05.mp3",
+      "bytes": 235980,
+      "sha256": "935484975cbf7d0bc622bfd5d7adad2cd80a77a38a847f27b4b85a3d89befbb0",
+      "change": "added"
+    },
+    {
+      "path": "beibei-listening-06.mp3",
+      "bytes": 210067,
+      "sha256": "3bf280e1332813b887624fba563969e27c8cf872ce5621ad8ef375bdddf6e00a",
+      "change": "added"
+    },
+    {
+      "path": "core.js",
+      "bytes": 15594,
+      "sha256": "48793f45075c5a9421637f5905a667f43e1444e9a698a528f0bf413049c677d5",
+      "change": "modified"
+    },
+    {
+      "path": "dashboard.js",
+      "bytes": 10945,
+      "sha256": "b8dd19c7356bcf4113d4b9e46b90b1091528019e69d4c1f84494e9e91b764bda",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "garden-core.js",
+      "bytes": 6845,
+      "sha256": "945bbf48d143cd7a73325bbc5e6b00e834b7c8f97e6da2b76a2c747288949239",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "garden.js",
+      "bytes": 12053,
+      "sha256": "a267baa3c9160b066e25c732cde9fd61ffe5b546cfa2ccacf983bfa589d7b4e9",
+      "change": "modified"
+    },
+    {
+      "path": "index.html",
+      "bytes": 57935,
+      "sha256": "b8415e1fd9e6dad9391cea14c839532999125432b0152a04c46d0877a83ae6ef",
+      "change": "modified"
+    },
+    {
+      "path": "learning-core.js",
+      "bytes": 17655,
+      "sha256": "dda1ec7f473c23d48d96363e65327982597fc0ce0c4488ddda79eaa51326a9e4",
+      "change": "modified"
+    },
+    {
+      "path": "learning.js",
+      "bytes": 20243,
+      "sha256": "e8d22ab65908e5bbd670a1fcf12852e9bda2667b948e87b567429cb42be135b2",
+      "change": "modified"
+    },
+    {
+      "path": "listening-template.json",
+      "bytes": 1254,
+      "sha256": "a65666cba4b3eee2960fe60c8999dcedc1f9a52bd3f5d6306f5de6c14b434a68",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "listening.js",
+      "bytes": 17403,
+      "sha256": "a4d10bb5ac104f9e74618651351805369d8021df290fbad0e68ce2b384f2e2c5",
+      "change": "modified"
+    },
+    {
+      "path": "materials-batch.css",
+      "bytes": 2060,
+      "sha256": "93cb6cff6ccd767aae0462e15bdc2f881e203119993349c6900426c8b5d56eec",
+      "change": "added"
+    },
+    {
+      "path": "materials-batch.js",
+      "bytes": 4756,
+      "sha256": "adb271cb17a981d8f56f0ffa65988dd1f48f14a51ef1b280b952f516b33bd614",
+      "change": "added"
+    },
+    {
+      "path": "materials-core.js",
+      "bytes": 9994,
+      "sha256": "340fb21ed8faf41e79f9a8695a685bcc07018627188ee2154411c9a4e2afb9ae",
+      "change": "modified"
+    },
+    {
+      "path": "materials-reading-template.json",
+      "bytes": 3113,
+      "sha256": "242d99cc1063fcb72828baf3bdd38733d23421324d23206b6697b0d0301d7050",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "materials-store.js",
+      "bytes": 5811,
+      "sha256": "f100cf6edc8387c34ad1629c8215b5227c238652bd5c2212758d3e4ccf9c8c90",
+      "change": "modified"
+    },
+    {
+      "path": "materials-word-template.csv",
+      "bytes": 374,
+      "sha256": "82488fd346189672aa49da86646051ae5f0de674f417a5d03f334080debb7eda",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "materials-word-template.json",
+      "bytes": 453,
+      "sha256": "038091360e5dd24e33202a15cd0496a7dd43283118519be26e8c793a4c61fe45",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "materials.js",
+      "bytes": 26813,
+      "sha256": "fe2e3f5e3cd81710539cf9b1c2214c4120b65cffebf15dd71c8835ced708b944",
+      "change": "modified"
+    },
+    {
+      "path": "media-store.js",
+      "bytes": 5023,
+      "sha256": "124f7148614d89c52fed0a06a4efafe32dd92b06c168361d203334d4f8af3451",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "memory-data.js",
+      "bytes": 3207,
+      "sha256": "8c39af12aa3180ec0b0f2d740d0b88148e86395639a55d1a423fd64493465fe7",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "pets.js",
+      "bytes": 4831,
+      "sha256": "f95703de55138838dc6469a673d8c0ca208dff725f7bf7ff9dcc82271d4dc254",
+      "change": "modified"
+    },
+    {
+      "path": "platform-core.js",
+      "bytes": 10404,
+      "sha256": "be3db16667eceb625048b1126396b76528600df2ab9fff856aee786bdbcebe04",
+      "change": "modified"
+    },
+    {
+      "path": "reading-data.js",
+      "bytes": 7653,
+      "sha256": "b2735d850f1529487ba7a164dab78b2f1ca4536b4ab10bc5a53d6d600f476ff3",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "reading-template.json",
+      "bytes": 10676,
+      "sha256": "39ce20244fb5eeb7fea0a185f6d080f33530280b49cc53598e177a6a7254f1f0",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "relax.js",
+      "bytes": 2498,
+      "sha256": "698749808b13a50ce968e5e1fc355f62967a26dcc01c5a6fa9c4a228a75a3ace",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "spelling-core.js",
+      "bytes": 3103,
+      "sha256": "4f19d99febec1c08e6fa5967e1d83cda06fa6f5797dd0a4a05d6f19b129db30c",
+      "change": "added"
+    },
+    {
+      "path": "styles.css",
+      "bytes": 52742,
+      "sha256": "61cbb51f2651255f0b15995861349c15c13dbaadfcaad48ecedea03f64e890eb",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "training-data.js",
+      "bytes": 3502,
+      "sha256": "3b5d4b0862f96057b5b36bf376a169075535727763688181c799b04f88015159",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "v2.css",
+      "bytes": 5466,
+      "sha256": "9d6db3516bb9d90c3ea0e7c3099e6855b47534fab18bf80a48fb0c44126d9df1",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "v44-content.js",
+      "bytes": 47387,
+      "sha256": "5b04080ce30661ae25519e18f0bff1f3720cf396bb9457e4fa3e202b8da8e31b",
+      "change": "added"
+    },
+    {
+      "path": "v44-listening-template.json",
+      "bytes": 12814,
+      "sha256": "20548a838f9da7138277020ad46fab16629cccc0a516aa7acf1cb7fc64f2d160",
+      "change": "added"
+    },
+    {
+      "path": "v44-reading-template.json",
+      "bytes": 35324,
+      "sha256": "2cdad0c97cd665900bc720cee0b6e559e4083b3f46f41b4d4b9b04491bc22e11",
+      "change": "added"
+    },
+    {
+      "path": "v44-source.js",
+      "bytes": 5085,
+      "sha256": "7dce4253268a30552a5304967e1533c6c9385ead9676fbebcd5a409a10eb8db9",
+      "change": "added"
+    },
+    {
+      "path": "v44-tools.js",
+      "bytes": 9699,
+      "sha256": "f3bd5e714af5825e734e2abf8c86e142778bc9eec91d5831c84942609fa3bdbb",
+      "change": "added"
+    },
+    {
+      "path": "v44-vocabulary-template.csv",
+      "bytes": 387445,
+      "sha256": "ab4438038d1cf34a882673577c838719e7570c07e337bc4024d0f5c90880ab46",
+      "change": "added"
+    },
+    {
+      "path": "v44-vocabulary.js",
+      "bytes": 446684,
+      "sha256": "7005c257abbb2d7229a9acfc63f0bc846d35f9fb8c297e74cf95d2621f79f985",
+      "change": "added"
+    },
+    {
+      "path": "v44-writing-template.json",
+      "bytes": 14282,
+      "sha256": "3a62b278443a1347e9b5be3c1737b877d9ebd029eba5032a5aa9fc718bd47fdb",
+      "change": "added"
+    },
+    {
+      "path": "v44.css",
+      "bytes": 1601,
+      "sha256": "aa89a201a3923cc4deb9838e8ad330b55fd39311c710ab81df66a8a4359ebf8c",
+      "change": "added"
+    },
+    {
+      "path": "word-template.csv",
+      "bytes": 307,
+      "sha256": "a1d57bc6ae828a24386c827378716ba96d2f4ae4d37fd9aeeee49cee9986da54",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "words.js",
+      "bytes": 16779,
+      "sha256": "22d40d8c80ffa618845a2087d6dd47c4362940330ce90b43cf1c3db4bc910474",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "writing-template.json",
+      "bytes": 3147,
+      "sha256": "c59383c421f2f6189837514efc9562e763b9af6f83c8fe103a9a96639733bef9",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "writing.js",
+      "bytes": 12078,
+      "sha256": "c82640ec42d52674eb61334680cc692a4831719719d744e8ce949167d7a6832b",
+      "change": "unchanged-required-runtime"
+    },
+    {
+      "path": "README.md",
+      "bytes": 7606,
+      "sha256": "0b92dbd97f44dd41e15282e51afaf12084948d319122cf8940f68959d8a239b6",
+      "change": "modified"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "bytes": 5161,
+      "sha256": "51a0cee3332eb8d01179be2e3b5fa41d0681c6dfc96c6d85f0ecb747462b3421",
+      "change": "modified"
+    },
+    {
+      "path": "IMPORT-FORMATS.md",
+      "bytes": 8572,
+      "sha256": "cad3dc39233fcb9240ec94058c0f04b0a2d1782222bb9aed9f08eb88722ee375",
+      "change": "modified"
+    },
+    {
+      "path": "IPHONE-ACCEPTANCE.md",
+      "bytes": 4643,
+      "sha256": "f256d2ece1602774436f83d28a14284c8c49e39268b2f803d5b9807c0f750e27",
+      "change": "modified"
+    },
+    {
+      "path": "V4.4-SOURCES.md",
+      "bytes": 3696,
+      "sha256": "8285c1ae5796c5f9bfa25b60c90339f473647ce2daf8c98b6e0621409f111478",
+      "change": "added"
+    },
+    {
+      "path": "V4.4-DELIVERY.md",
+      "bytes": 4537,
+      "sha256": "83fce32bbc6718f1aca4d28cc8644c4f2a8e02127c2899188e99d9b3ee403617",
+      "change": "added"
+    },
+    {
+      "path": "TEST-REPORT-V4.4.md",
+      "bytes": 2990,
+      "sha256": "a5ee52d3b753b6bd4ce65ab6d67d05eaeabd4ecb986c2b736dbd0f1d7f326ca0",
+      "change": "added"
+    }
+  ]
+}

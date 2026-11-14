@@ -1,0 +1,346 @@
+{
+  "lessons": [
+    {
+      "id": "beibei-listening-01",
+      "type": "listening",
+      "title": "原创合成精听 · 图书馆座位通知",
+      "source": {
+        "kind": "original",
+        "label": "六级喵V4.4原创模拟练习",
+        "rights": "本项目原创文本与解析，允许随本项目部署、个人学习与备份。不是官方六级真题；录音为本机合成语音，不是真人考试录音。"
+      },
+      "year": null,
+      "audioId": null,
+      "audioPath": "beibei-listening-01.mp3",
+      "segments": [
+        {
+          "id": "s1",
+          "start": 0,
+          "end": 3.114,
+          "text": "The library will open a new study room on Monday.",
+          "translation": "图书馆将在周一开放一间新自习室。"
+        },
+        {
+          "id": "s2",
+          "start": 3.334,
+          "end": 6.694,
+          "text": "Students can book a seat through the campus website.",
+          "translation": "学生可以通过校园网站预约座位。"
+        },
+        {
+          "id": "s3",
+          "start": 6.914,
+          "end": 11.566,
+          "text": "Each booking lasts two hours and can be renewed if seats are available.",
+          "translation": "每次预约持续两小时，有空位时可以续约。"
+        },
+        {
+          "id": "s4",
+          "start": 11.786,
+          "end": 15.063,
+          "text": "Please cancel your booking if you no longer need it.",
+          "translation": "如果不再需要座位，请取消预约。"
+        },
+        {
+          "id": "s5",
+          "start": 15.283,
+          "end": 18.785,
+          "text": "Food is not allowed, but covered drinks are welcome.",
+          "translation": "室内不允许食物，但可以带有盖的饮料。"
+        },
+        {
+          "id": "s6",
+          "start": 19.005,
+          "end": 23.989,
+          "text": "The main desk can help anyone who has difficulty using the booking system.",
+          "translation": "任何使用预约系统有困难的人都可以向总服务台求助。"
+        }
+      ]
+    },
+    {
+      "id": "beibei-listening-02",
+      "type": "listening",
+      "title": "原创合成精听 · 实验讨论时间变更",
+      "source": {
+        "kind": "original",
+        "label": "六级喵V4.4原创模拟练习",
+        "rights": "本项目原创文本与解析，允许随本项目部署、个人学习与备份。不是官方六级真题；录音为本机合成语音，不是真人考试录音。"
+      },
+      "year": null,
+      "audioId": null,
+      "audioPath": "beibei-listening-02.mp3",
+      "segments": [
+        {
+          "id": "s1",
+          "start": 0,
+          "end": 3.661,
+          "text": "Our research meeting has moved from Tuesday to Thursday.",
+          "translation": "我们的研究会议从周二改到了周四。"
+        },
+        {
+          "id": "s2",
+          "start": 3.881,
+          "end": 8.286,
+          "text": "The new time is ten in the morning, in room two hundred and six.",
+          "translation": "新时间是上午十点，地点在206室。"
+        },
+        {
+          "id": "s3",
+          "start": 8.506,
+          "end": 11.749,
+          "text": "Please bring a short summary of your recent results.",
+          "translation": "请带一份近期结果的简短摘要。"
+        },
+        {
+          "id": "s4",
+          "start": 11.969,
+          "end": 15.605,
+          "text": "You do not need to finish the whole report before the meeting.",
+          "translation": "开会前不需要完成整份报告。"
+        },
+        {
+          "id": "s5",
+          "start": 15.825,
+          "end": 20.704,
+          "text": "We will first discuss problems with the method and then plan the next stage.",
+          "translation": "我们将先讨论方法中的问题，再计划下一阶段。"
+        },
+        {
+          "id": "s6",
+          "start": 20.924,
+          "end": 25.845,
+          "text": "If you cannot attend, send your questions to the group before Wednesday evening.",
+          "translation": "如果不能参加，请在周三晚之前把问题发给小组。"
+        }
+      ]
+    },
+    {
+      "id": "beibei-listening-03",
+      "type": "listening",
+      "title": "原创合成精听 · 从重读到主动回忆",
+      "source": {
+        "kind": "original",
+        "label": "六级喵V4.4原创模拟练习",
+        "rights": "本项目原创文本与解析，允许随本项目部署、个人学习与备份。不是官方六级真题；录音为本机合成语音，不是真人考试录音。"
+      },
+      "year": null,
+      "audioId": null,
+      "audioPath": "beibei-listening-03.mp3",
+      "segments": [
+        {
+          "id": "s1",
+          "start": 0,
+          "end": 3.581,
+          "text": "At first, I read the same notes again and again.",
+          "translation": "起初，我一遍遍读相同的笔记。"
+        },
+        {
+          "id": "s2",
+          "start": 3.801,
+          "end": 7.966,
+          "text": "The pages looked familiar, but I still forgot the main ideas.",
+          "translation": "页面看起来熟悉，但我仍会忘掉主要观点。"
+        },
+        {
+          "id": "s3",
+          "start": 8.186,
+          "end": 12.485,
+          "text": "Then I tried closing the book and explaining one idea from memory.",
+          "translation": "后来我试着合上书，凭记忆解释一个观点。"
+        },
+        {
+          "id": "s4",
+          "start": 12.705,
+          "end": 17.17,
+          "text": "When I found a mistake, I checked the notes and tried again later.",
+          "translation": "发现错误时，我会查看笔记，之后再试一次。"
+        },
+        {
+          "id": "s5",
+          "start": 17.39,
+          "end": 22.192,
+          "text": "The change did not make learning effortless, but it showed me what to practise.",
+          "translation": "这种改变没有让学习变得毫不费力，但让我知道该练什么。"
+        },
+        {
+          "id": "s6",
+          "start": 22.412,
+          "end": 26.411,
+          "text": "Now I use short reviews and leave some time between them.",
+          "translation": "现在我做简短复习，并在复习之间留出一些时间。"
+        }
+      ]
+    },
+    {
+      "id": "beibei-listening-04",
+      "type": "listening",
+      "title": "原创合成精听 · 校园骑行项目",
+      "source": {
+        "kind": "original",
+        "label": "六级喵V4.4原创模拟练习",
+        "rights": "本项目原创文本与解析，允许随本项目部署、个人学习与备份。不是官方六级真题；录音为本机合成语音，不是真人考试录音。"
+      },
+      "year": null,
+      "audioId": null,
+      "audioPath": "beibei-listening-04.mp3",
+      "segments": [
+        {
+          "id": "s1",
+          "start": 0,
+          "end": 4.345,
+          "text": "The university is testing a shared bicycle service near the east gate.",
+          "translation": "大学正在东门附近试行共享自行车服务。"
+        },
+        {
+          "id": "s2",
+          "start": 4.565,
+          "end": 7.344,
+          "text": "The trial will continue for six weeks.",
+          "translation": "试行将持续六周。"
+        },
+        {
+          "id": "s3",
+          "start": 7.564,
+          "end": 11.513,
+          "text": "Students must return bicycles to a marked parking area.",
+          "translation": "学生必须把车还到有标记的停车区。"
+        },
+        {
+          "id": "s4",
+          "start": 11.733,
+          "end": 16.869,
+          "text": "The team will count rides and also ask which journeys the bicycles replace.",
+          "translation": "团队将统计骑行次数，也会询问自行车替代了哪些出行。"
+        },
+        {
+          "id": "s5",
+          "start": 17.089,
+          "end": 21.288,
+          "text": "A higher ride count alone will not prove that car use has fallen.",
+          "translation": "仅有更多骑行次数，不能证明汽车使用已减少。"
+        },
+        {
+          "id": "s6",
+          "start": 21.508,
+          "end": 25.906,
+          "text": "Feedback about safety and accessible routes is especially welcome.",
+          "translation": "尤其欢迎关于安全与无障碍路线的反馈。"
+        }
+      ]
+    },
+    {
+      "id": "beibei-listening-05",
+      "type": "listening",
+      "title": "原创合成精听 · 小组合作与反馈",
+      "source": {
+        "kind": "original",
+        "label": "六级喵V4.4原创模拟练习",
+        "rights": "本项目原创文本与解析，允许随本项目部署、个人学习与备份。不是官方六级真题；录音为本机合成语音，不是真人考试录音。"
+      },
+      "year": null,
+      "audioId": null,
+      "audioPath": "beibei-listening-05.mp3",
+      "segments": [
+        {
+          "id": "s1",
+          "start": 0,
+          "end": 3.102,
+          "text": "We divided the presentation into three parts.",
+          "translation": "我们把展示分成了三个部分。"
+        },
+        {
+          "id": "s2",
+          "start": 3.322,
+          "end": 7.32,
+          "text": "Each person prepared an outline before we wrote the full script.",
+          "translation": "写完整讲稿之前，每个人都先准备了提纲。"
+        },
+        {
+          "id": "s3",
+          "start": 7.54,
+          "end": 12.829,
+          "text": "During the first rehearsal, we noticed that two sections repeated the same point.",
+          "translation": "第一次排练时，我们发现有两部分重复了同一观点。"
+        },
+        {
+          "id": "s4",
+          "start": 13.049,
+          "end": 19.014,
+          "text": "Instead of simply speaking faster, we removed the repetition and added a clearer transition.",
+          "translation": "我们没有简单地加快语速，而是删掉重复，并加入更清楚的过渡。"
+        },
+        {
+          "id": "s5",
+          "start": 19.234,
+          "end": 22.819,
+          "text": "Specific feedback helped us decide what to change.",
+          "translation": "具体的反馈帮助我们决定要改什么。"
+        },
+        {
+          "id": "s6",
+          "start": 23.039,
+          "end": 29.174,
+          "text": "Our final aim was to make the argument easy to follow, not to include every fact we had found.",
+          "translation": "我们的最终目标是让论证容易理解，而不是塞入找到的每一个事实。"
+        }
+      ]
+    },
+    {
+      "id": "beibei-listening-06",
+      "type": "listening",
+      "title": "原创合成精听 · 核对来源的提醒",
+      "source": {
+        "kind": "original",
+        "label": "六级喵V4.4原创模拟练习",
+        "rights": "本项目原创文本与解析，允许随本项目部署、个人学习与备份。不是官方六级真题；录音为本机合成语音，不是真人考试录音。"
+      },
+      "year": null,
+      "audioId": null,
+      "audioPath": "beibei-listening-06.mp3",
+      "segments": [
+        {
+          "id": "s1",
+          "start": 0,
+          "end": 3.558,
+          "text": "A polished paragraph can still contain a doubtful claim.",
+          "translation": "一个写得漂亮的段落仍可能包含可疑的主张。"
+        },
+        {
+          "id": "s2",
+          "start": 3.778,
+          "end": 7.291,
+          "text": "Before using a quotation, check the original source.",
+          "translation": "使用引文之前，应核对原始来源。"
+        },
+        {
+          "id": "s3",
+          "start": 7.511,
+          "end": 11.587,
+          "text": "Make sure the author actually makes the point you want to support.",
+          "translation": "确保作者确实表达了你想支持的观点。"
+        },
+        {
+          "id": "s4",
+          "start": 11.807,
+          "end": 16.174,
+          "text": "A sentence taken out of context may create a misleading impression.",
+          "translation": "脱离语境的一句话可能造成误导印象。"
+        },
+        {
+          "id": "s5",
+          "start": 16.394,
+          "end": 21.151,
+          "text": "If you cannot verify a reference, do not present it as established evidence.",
+          "translation": "如果无法核实参考来源，就不要把它当成确定的证据。"
+        },
+        {
+          "id": "s6",
+          "start": 21.371,
+          "end": 25.932,
+          "text": "Careful checking takes time, but it is part of responsible writing.",
+          "translation": "仔细核对需要时间，但它是负责任写作的一部分。"
+        }
+      ]
+    }
+  ]
+}
