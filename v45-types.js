@@ -116,6 +116,73 @@ function renderMatching(box,data,store){
   box.append(card);
 }
 
+/* 本地导入的题型包（真题选词填空 / 长篇匹配）：只存本机浏览器，不上传任何服务器。 */
+var IMPORT_KEY='liujimiao-v45-imported-types-v1';
+function loadImported(){try{var v=JSON.parse(localStorage.getItem(IMPORT_KEY));return Array.isArray(v)?v:[];}catch(e){return[];}}
+function saveImported(list){try{localStorage.setItem(IMPORT_KEY,JSON.stringify(list));}catch(e){}}
+function validEntry(e){
+  if(!e||typeof e!=='object'||!e.id||!e.title)return false;
+  if(e.kind==='cloze'){
+    return typeof e.passage==='string'&&Array.isArray(e.bank)&&e.bank.length===15&&
+      Array.isArray(e.blanks)&&e.blanks.length===10&&
+      e.blanks.every(function(b){return e.bank.some(function(w){return w.id===b.answer;});});
+  }
+  if(e.kind==='matching'){
+    return Array.isArray(e.paragraphs)&&e.paragraphs.length>=5&&
+      Array.isArray(e.statements)&&e.statements.length===10&&
+      e.statements.every(function(s){return e.paragraphs.some(function(p){return p.id===s.answer;});});
+  }
+  return false;
+}
+function renderImported(box,store){
+  loadImported().forEach(function(e){
+    if(e.kind==='cloze')renderCloze(box,e,store);
+    else if(e.kind==='matching')renderMatching(box,e,store);
+  });
+}
+function renderImportCard(box){
+  var card=el('section','card v45-card');
+  card.append(el('h2',null,'导入真题题型包'));
+  card.append(el('p','helper','选择 Muse 转好的题型包 JSON（选词填空 / 长篇匹配），导入后只保存在这台设备的浏览器里，不会上传，也不会出现在网站仓库中。同名包重复导入会覆盖更新。'));
+  var input=document.createElement('input');
+  input.type='file';input.accept='.json,application/json';input.className='v45-file';
+  input.setAttribute('aria-label','选择题型包 JSON 文件');
+  var status=el('p','helper');status.setAttribute('role','status');
+  input.addEventListener('change',function(){
+    var f=input.files&&input.files[0];if(!f)return;
+    var reader=new FileReader();
+    reader.onload=function(){
+      try{
+        var raw=JSON.parse(String(reader.result||''));
+        var packs=Array.isArray(raw)?raw:(raw.packs||[raw]);
+        var good=packs.filter(validEntry);
+        if(!good.length){status.textContent='没有识别出有效的题型包，请确认选的是 Muse 转好的题型包文件。';return;}
+        var list=loadImported();
+        good.forEach(function(g){
+          var i=list.findIndex(function(x){return x.id===g.id;});
+          if(i>=0)list[i]=g;else list.push(g);
+        });
+        saveImported(list);
+        status.textContent='已导入 '+good.length+' 个题型包，正在刷新本区…';
+        var host=document.getElementById('v45-types');
+        if(host)host.remove();
+        init();
+      }catch(err){status.textContent='文件解析失败，请确认选的是 JSON 文件。';}
+    };
+    reader.readAsText(f);
+  });
+  var clear=el('button','soft','清除全部已导入题型包');
+  clear.addEventListener('click',function(){
+    saveImported([]);status.textContent='已清除全部已导入题型包，正在刷新本区…';
+    var host=document.getElementById('v45-types');
+    if(host)host.remove();
+    init();
+  });
+  var actions=el('div','inline-actions');actions.append(clear);
+  card.append(input,actions,status);
+  box.append(card);
+}
+
 function init(){
   var host=document.getElementById('page-reading');
   var data=root.V45_CONTENT&&root.V45_CONTENT.types;
@@ -129,6 +196,8 @@ function init(){
   var store=load();
   if(data.cloze)renderCloze(box,data.cloze,store);
   if(data.matching)renderMatching(box,data.matching,store);
+  renderImported(box,store);
+  renderImportCard(box);
   host.append(box);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
