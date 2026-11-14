@@ -80,8 +80,8 @@ $('word-order').addEventListener('change',async()=>{const order=$('word-order').
 $('word-accent').addEventListener('change',()=>{const accent=$('word-accent').value;A.transact(s=>{s.study.accent=accent;});});
 // 词卡页与资料中心共用一个预览、校验、去重和确认流程。
 $('word-file').addEventListener('change',async()=>{
- const file=$('word-file').files[0];if(!file)return;
- try{if(!window.MaterialsUI)throw Error('资料中心尚未就绪，请刷新页面后重试。');await MaterialsUI.previewFile(file,'vocabulary');}
+ const files=Array.from($('word-file').files);if(!files.length)return;
+ try{if(!window.MaterialsUI)throw Error('资料中心尚未就绪，请刷新页面后重试。');await MaterialsUI.previewFiles(files,'vocabulary');}
  catch(e){saveError(e);}finally{$('word-file').value='';}
 });
 function tokenize(target,text,paragraph){

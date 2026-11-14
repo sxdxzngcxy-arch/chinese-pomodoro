@@ -22,21 +22,24 @@ async function digest(record){if(!globalThis.crypto?.subtle)throw Error('资料�
 async function addBatch(input,base,retiredInput=[]){
  const records=input.map(r=>M.normalize(r));const hashes=await Promise.all(records.map(digest));const db=await open();
  const result=await new Promise((resolve,reject)=>{
-  const tx=db.transaction(['materials','retired'],'readwrite'),store=tx.objectStore('materials'),retired=tx.objectStore('retired'),req=store.getAll(),rreq=retired.getAll();let current=null,tombs=null,summary={added:0,skipped:[]},failure=null;
+  const tx=db.transaction(['materials','retired'],'readwrite'),store=tx.objectStore('materials'),retired=tx.objectStore('retired'),req=store.getAll(),rreq=retired.getAll();let current=null,tombs=null,summary={added:0,addedIds:[],skipped:[]},failure=null;
   const run=()=>{if(current===null||tombs===null)return;try{
    const known=[...current],add=[],index=M.duplicateIndex(current,base);
    for(const [i,r]of records.entries()){
     let reason=index.check(r);
     if(!reason&&r.kind==='reading'){const tomb=tombs.find(t=>t.articleId===r.payload.id);if(tomb&&tomb.digest!==hashes[i])reason='该阅读ID曾用于不同文章，请改用新ID以保护旧答题记录。';}
-    if(reason){summary.skipped.push({title:r.title,reason});continue;}known.push(r);index.add(r);add.push({record:r,digest:hashes[i]});
+    if(reason){summary.skipped.push({id:r.id,title:r.title,reason});continue;}known.push({...r,digest:hashes[i]});index.add(r);add.push({record:r,digest:hashes[i]});
    }
    const bytes=new TextEncoder().encode(JSON.stringify(known)).byteLength;
-   if(known.length>M.MAX_RECORDS||bytes>M.MAX_STORED)throw Error('本阶段资料库上限为5000条 / 6MB文本。请导出并整理后重试；没有覆盖或部分写入。');
-   for(const item of add){store.add({...item.record,digest:item.digest});if(item.record.kind==='reading')retired.delete(item.record.payload.id);}summary.added=add.length;
+   if(known.length>M.MAX_RECORDS||bytes>M.MAX_STORED)throw Error('资料库上限为5000条 / 6MiB文本。请导出并整理后重试；本次没有部分写入，也没有覆盖旧资料。');
+   for(const item of add){store.add({...item.record,digest:item.digest});if(item.record.kind==='reading')retired.delete(item.record.payload.id);}summary.added=add.length;summary.addedIds=add.map(item=>item.record.id);
    for(const t of retiredInput)if(!tombs.some(x=>x.articleId===t.articleId)&&!known.some(r=>r.kind==='reading'&&r.payload.id===t.articleId))retired.add(t);
-  }catch(e){failure=e;tx.abort();}};
+  }catch(e){failure=e?.name==='QuotaExceededError'?error(e):e;tx.abort();}};
   req.onsuccess=()=>{current=req.result;run();};rreq.onsuccess=()=>{tombs=rreq.result;run();};tx.oncomplete=()=>resolve(summary);tx.onabort=()=>reject(failure||error(tx.error));tx.onerror=()=>{};
- });await refresh();broadcast();return result;
+ });
+ // 事务完成后，列表刷新失败不能被误报为“未保存”，也不能据此重复提交。
+ try{await refresh();}catch(e){result.refreshPending=true;result.message=`资料已保存，但列表刷新失败：${e.message} 请重新连接资料库，勿重复导入。`;}
+ broadcast();return result;
 }
 async function remove(id){
  const db=await open(),r=(await readAll()).find(r=>r.id===id);if(!r)return false;const hash=r.kind==='reading'?(r.digest||await digest(r)):null;

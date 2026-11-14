@@ -64,6 +64,7 @@ function parse(input,filename,kind){
   }
  }else{
   let raw;try{raw=JSON.parse(input.replace(/^\uFEFF/,''));}catch(e){throw Error(`JSON 解析失败：${e.message}`);}
+  if(obj(raw)&&(raw.backupFormat==='liujimiao-full'||raw.version===2&&obj(raw.settings)&&obj(raw.progress)))throw Error('这是整站学习备份，请到“设置 → 整站数据备份与恢复”操作；资料导入不会替换学习记录。');
   if(obj(raw)&&raw.format==='cet6-materials'){
    if(raw.version!==1||!Array.isArray(raw.materials)||raw.materials.length>MAX_RECORDS||(raw.assets!==undefined&&(!Array.isArray(raw.assets)||raw.assets.length)))throw Error('资料备份版本、数量或音频资源不受支持。');
    return raw.materials.map(r=>({...copy(r),selected:true}));
